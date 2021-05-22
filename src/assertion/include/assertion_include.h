@@ -1,0 +1,10 @@
+//
+// Created by Anton on 2021-05-12.
+//
+
+#ifndef USIDE_SRC_ASSERT_INCLUDE_ASSERT_INCLUDE_H
+#define USIDE_SRC_ASSERT_INCLUDE_ASSERT_INCLUDE_H
+
+#include "../h/assertion_macro.h"
+
+#endif //USIDE_SRC_ASSERT_INCLUDE_ASSERT_INCLUDE_H

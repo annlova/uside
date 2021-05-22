@@ -1,0 +1,11 @@
+//
+// Created by Anton on 2021-05-22.
+//
+
+#ifndef USIDE_SRC_TEXTURE_INCLUDE_TEXTURE_INCLUDE_H
+#define USIDE_SRC_TEXTURE_INCLUDE_TEXTURE_INCLUDE_H
+
+// TODO: change
+#include "../h/texture.h"
+
+#endif //USIDE_SRC_TEXTURE_INCLUDE_TEXTURE_INCLUDE_H
