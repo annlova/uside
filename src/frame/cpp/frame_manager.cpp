@@ -4,7 +4,6 @@
 
 #include "../h/frame_manager.h"
 
-#include <log/include/log_include.h>
 #include <assertion/include/assertion_include.h>
 
 frame::FrameManager::FrameManager() {
@@ -22,8 +21,8 @@ frame::FrameManager::FrameManager() {
     }
 
     // TODO: Remove, handle custom window hints somehow for each window
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RED_BITS, 8);

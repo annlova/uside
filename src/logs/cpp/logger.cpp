@@ -7,14 +7,14 @@
 #include <thread>
 #include <string_view>
 
-const log::Logger& log::Logger::begin(LogSeverityLevel level, const char* file, long line) const {
+const logs::Logger& logs::Logger::begin(LogSeverityLevel level, const char* file, long line) const {
     // Set console output color
     std::cout << "\033[" << gcLogSeverityLevelConsoleTextAttribute[level] << "m";
 
     // string view used for formatting
     std::string_view fileView(file);
 
-    // Print log message title
+    // Print logs message title
     std::cout << std::dec << "[";
     printTime();
     std::cout << "][";
@@ -35,7 +35,7 @@ const log::Logger& log::Logger::begin(LogSeverityLevel level, const char* file, 
     return *this;
 }
 
-void log::Logger::printSeverity(LogSeverityLevel level) {
+void logs::Logger::printSeverity(LogSeverityLevel level) {
     std::cout << std::setw(gcLogSeverityTitleWidth) << std::left;
     switch (level) {
         case FTL:
@@ -59,7 +59,7 @@ void log::Logger::printSeverity(LogSeverityLevel level) {
     }
 }
 
-void log::Logger::printTime() {
+void logs::Logger::printTime() {
     time_t time = std::time(nullptr); // Retrieve the time and store in time variable
     if(time == -1){
         // Something went wrong, print error message

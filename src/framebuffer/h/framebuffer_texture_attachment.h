@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 
 #include <texture/include/texture_include.h>
+
 namespace framebuffer {
     enum FramebufferTextureAttachmentType {
         COLOR,

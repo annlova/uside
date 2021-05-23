@@ -6,6 +6,7 @@
 #define USIDE_SRC_FRAMEBUFFER_H_FRAMEBUFFER_H
 
 #include <vector>
+#include <climits>
 
 #include "framebuffer_texture_attachment.h"
 #include "framebuffer_info.h"
@@ -35,6 +36,7 @@ namespace framebuffer {
         void bind(GLint x, GLint y, GLsizei width, GLsizei height);
         void bind(GLsizei width, GLsizei height);
         void bind();
+        void markUnbound();
 
     public:
         void clear(bool color, bool depth = false, bool stencil = false) const;
@@ -107,9 +109,13 @@ namespace framebuffer {
         static bool isValidInternalDepthTextureFormat(GLint format);
         static bool isValidInternalStencilTextureFormat(GLint format);
         static bool isValidInternalDepthStencilTextureFormat(GLint format);
+
     private:
         /// The latest bound framebuffer.
         static GLuint msBoundHandle;
+
+        /// Value indicating that no framebuffer is currently bound (even though technically this is not possible).
+        static constexpr GLuint msBoundHandleUnboundValue = UINT_MAX;
 
         /// OpenGL handle.
         GLuint mHandle;

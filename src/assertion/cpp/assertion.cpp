@@ -4,7 +4,7 @@
 
 #include "../h/assertion.h"
 
-#include <log/include/log_include.h>
+#include <logs/include/log_include.h>
 
 void assertion::outputAssertion(const char* message, const char* condition, const char* pathName, const char* fileName, const char* functionName, long lineNumber){
     LOG_FTL() << "Assertion failed:"           << LOG_NL

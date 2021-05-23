@@ -5,7 +5,7 @@
 #ifndef USIDE_SRC_LOG_H_LOG_PAD_H
 #define USIDE_SRC_LOG_H_LOG_PAD_H
 
-namespace log {
+namespace logs {
     struct LogPad {
         int mPadding;
     };

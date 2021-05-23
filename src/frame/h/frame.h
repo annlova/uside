@@ -11,7 +11,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <log/include/log_include.h>
+#include <logs/include/log_include.h>
 
 namespace frame {
     struct GLFWwindowDeleter {

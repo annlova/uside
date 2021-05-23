@@ -5,7 +5,7 @@
 #ifndef USIDE_SRC_LOG_H_LOG_FLAG_H
 #define USIDE_SRC_LOG_H_LOG_FLAG_H
 
-namespace log {
+namespace logs {
     struct LogFlag {
         char mFlag;
     };

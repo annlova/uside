@@ -7,7 +7,7 @@
 
 #include <glad/glad.h>
 
-#include <log/include/log_include.h>
+#include <logs/include/log_include.h>
 #include <assertion/include/assertion_include.h>
 
 namespace texture {

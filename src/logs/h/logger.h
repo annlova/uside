@@ -15,7 +15,7 @@
 #include "log_pad.h"
 #include "log_severity_level.h"
 
-namespace log {
+namespace logs {
 
     /**
      *  Class for handling debug output to console. Interacted

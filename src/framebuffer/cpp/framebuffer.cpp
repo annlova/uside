@@ -4,14 +4,11 @@
 
 #include "../h/framebuffer.h"
 
-#include <climits>
-
 #include <configs/framebuffer_config.h>
-#include <log/include/log_include.h>
-#include <assertion/include/assertion_include.h>
+#include <logs/include/log_include.h>
 #include <globals/debug_code_maco.h>
 
-GLuint framebuffer::Framebuffer::msBoundHandle = UINT_MAX; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+GLuint framebuffer::Framebuffer::msBoundHandle = msBoundHandleUnboundValue; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 framebuffer::Framebuffer::Framebuffer(const GLsizei width, const GLsizei height)
     : mHandle{0},
@@ -124,6 +121,11 @@ void framebuffer::Framebuffer::bind() {
     bind(0, 0, mBindInfo.mViewportWidth, mBindInfo.mViewportHeight);
 }
 
+void framebuffer::Framebuffer::markUnbound() {
+    ASSERT_MSG(isBound(), "Framebuffer not bound!");
+    msBoundHandle = msBoundHandleUnboundValue;
+}
+
 void framebuffer::Framebuffer::clear(bool color, bool depth, bool stencil) const {
     ASSERT_MSG(isBound(), "Framebuffer not bound!");
 
@@ -145,7 +147,7 @@ void framebuffer::Framebuffer::clear(bool color, bool depth, bool stencil) const
 }
 
 void framebuffer::Framebuffer::modifyViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound.");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
     ASSERT_MSG(width > 0, "Viewport width cannot be negative.");
     ASSERT_MSG(height > 0, "Viewport height cannot be negative.");
 
@@ -162,7 +164,7 @@ void framebuffer::Framebuffer::modifyViewport(GLsizei width, GLsizei height) {
 }
 
 void framebuffer::Framebuffer::modifyClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     auto redPair = Framebuffer::clamp(red, 0.0F, 1.0F);
     auto greenPair = Framebuffer::clamp(green, 0.0F, 1.0F);
@@ -196,7 +198,7 @@ void framebuffer::Framebuffer::modifyClearColor(GLfloat red, GLfloat green, GLfl
 }
 
 void framebuffer::Framebuffer::modifyDepthTestingEnabled(bool depthTestingEnabled) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     mInfo.mDepthTestingEnabled = depthTestingEnabled;
     if (depthTestingEnabled) {
@@ -209,7 +211,7 @@ void framebuffer::Framebuffer::modifyDepthTestingEnabled(bool depthTestingEnable
 }
 
 void framebuffer::Framebuffer::modifyClearDepth(GLfloat clearDepth) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     auto clearDepthPair = Framebuffer::clamp(clearDepth, 0.0F, 1.0F);
 
@@ -225,7 +227,7 @@ void framebuffer::Framebuffer::modifyClearDepth(GLfloat clearDepth) {
 }
 
 void framebuffer::Framebuffer::modifyDepthFunction(GLenum depthFunction) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
     ASSERT_MSG(isValidDepthFunction(depthFunction), "Invalid depth function.");
 
     mInfo.mDepthFunction = depthFunction;
@@ -234,7 +236,7 @@ void framebuffer::Framebuffer::modifyDepthFunction(GLenum depthFunction) {
 }
 
 void framebuffer::Framebuffer::modifyDepthMask(GLboolean depthMask) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     mInfo.mDepthMask = depthMask;
     glDepthMask(depthMask);
@@ -242,7 +244,7 @@ void framebuffer::Framebuffer::modifyDepthMask(GLboolean depthMask) {
 }
 
 void framebuffer::Framebuffer::modifyDepthRange(GLfloat depthRangeNear, GLfloat depthRangeFar) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     auto nearPair = Framebuffer::clamp(depthRangeNear, 0.0F, 1.0F);
     auto farPair = Framebuffer::clamp(depthRangeFar, 0.0F, 1.0F);
@@ -264,7 +266,7 @@ void framebuffer::Framebuffer::modifyDepthRange(GLfloat depthRangeNear, GLfloat 
 }
 
 void framebuffer::Framebuffer::modifyStencilTestingEnabled(bool stencilTestingEnabled) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     mInfo.mStencilTestingEnabled = stencilTestingEnabled;
     if (stencilTestingEnabled) {
@@ -277,7 +279,7 @@ void framebuffer::Framebuffer::modifyStencilTestingEnabled(bool stencilTestingEn
 }
 
 void framebuffer::Framebuffer::modifyClearStencil(GLint clearStencil) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     auto numBitsInStencilBuffer = getNumBitPlanesInStencilBuffer();
 
@@ -294,7 +296,7 @@ void framebuffer::Framebuffer::modifyClearStencil(GLint clearStencil) {
 }
 
 void framebuffer::Framebuffer::modifyStencilFunction(GLenum func, GLint ref, GLuint mask) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
     ASSERT_MSG(isValidStencilFunctionFunc(func), "Stencil test function not valid.");
 
     auto numBitPlanesInStencilBuffer = getNumBitPlanesInStencilBuffer();
@@ -311,7 +313,7 @@ void framebuffer::Framebuffer::modifyStencilFunction(GLenum func, GLint ref, GLu
 }
 
 void framebuffer::Framebuffer::modifyStencilMask(GLuint stencilMask) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     mInfo.mStencilMask = stencilMask;
     glStencilMask(stencilMask);
@@ -319,7 +321,7 @@ void framebuffer::Framebuffer::modifyStencilMask(GLuint stencilMask) {
 }
 
 void framebuffer::Framebuffer::modifyStencilOperation(GLenum sFail, GLenum dpFail, GLenum dpPass) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
     ASSERT_MSG(isValidStencilOperation(sFail), "Stencil operation sFail is not valid.");
     ASSERT_MSG(isValidStencilOperation(dpFail), "Stencil operation dpFail is not valid.");
     ASSERT_MSG(isValidStencilOperation(dpPass), "Stencil operation dpPass is not valid.");
@@ -332,7 +334,7 @@ void framebuffer::Framebuffer::modifyStencilOperation(GLenum sFail, GLenum dpFai
 }
 
 void framebuffer::Framebuffer::modifyCullingEnabled(bool cullingEnabled) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
 
     mInfo.mCullingEnabled = cullingEnabled;
     if (cullingEnabled) {
@@ -345,7 +347,7 @@ void framebuffer::Framebuffer::modifyCullingEnabled(bool cullingEnabled) {
 }
 
 void framebuffer::Framebuffer::modifyFrontFace(GLenum frontFace) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
     ASSERT_MSG(isValidFrontFace(frontFace), "Front face must be GL_CW or GL_CCW.");
 
     mInfo.mFrontFace = frontFace;
@@ -354,7 +356,7 @@ void framebuffer::Framebuffer::modifyFrontFace(GLenum frontFace) {
 }
 
 void framebuffer::Framebuffer::modifyCullFace(GLenum cullFace) {
-    ASSERT_MSG(isBound(), "Framebuffer is not bound!");
+    ASSERT_MSG(isBound(), "Framebuffer not bound.");
     ASSERT_MSG(isValidCullFace(cullFace), "Cull face must be GL_FRONT, GL_BACK or GL_FRONT_AND_BACK.");
 
     mInfo.mCullFace = cullFace;

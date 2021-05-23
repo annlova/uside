@@ -5,7 +5,7 @@
 #ifndef USIDE_SRC_LOG_H_LOG_SEVERITY_LEVEL_H
 #define USIDE_SRC_LOG_H_LOG_SEVERITY_LEVEL_H
 
-namespace log {
+namespace logs {
     enum LogSeverityLevel {
         FTL   = 0,
         ERR   = 1,

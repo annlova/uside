@@ -1,0 +1,73 @@
+//
+// Created by anton on 2021-05-23.
+//
+
+#ifndef USIDE_FILE_LOADER_H
+#define USIDE_FILE_LOADER_H
+
+#include <string>
+#include <vector>
+#include <sstream>
+
+#include <logs/include/log_include.h>
+
+#include "file_flags.h"
+
+namespace file {
+    class FileLoader {
+    public:
+        static std::string readText(const char* path) {
+            std::ifstream input(path, std::ios::in);
+
+            if (input.is_open()) {
+                std::stringstream buffer;
+                buffer << input.rdbuf();
+                input.close();
+
+                return buffer.str();
+            } else {
+                LOG_ERR() << "Unable to open \"" << path << "\" for reading." << LOG_END;
+            }
+
+            return "";
+        }
+
+        static std::vector<std::byte> readBinary(const char* path) {
+            std::ifstream input(path, std::ios::in | std::ios::binary);
+
+            if (input.is_open()) {
+                std::vector<std::byte> bytes((std::istreambuf_iterator<char>(input)),(std::istreambuf_iterator<char>()));
+                input.close();
+
+                return bytes;
+            } else {
+                LOG_ERR() << "Unable to open \"" << path << "\" for reading." << LOG_END;
+            }
+
+            return std::vector<std::byte>();
+        }
+
+        static void writeText(const char* path, const char* data, WriteFlag flags) {
+            std::ofstream outputFile(path, std::ios::out | static_cast<std::ios::openmode>(flags));
+
+            if(outputFile.is_open()) {
+                outputFile << data;
+                outputFile.close();
+            } else {
+                LOG_ERR() << "Unable to open \"" << path << "\" for writing." << LOG_END;
+            }
+        }
+
+        static void writeBinary(const char* path, const std::byte* data, WriteFlag flags) {
+            std::ofstream outputFile(path, std::ios::out | std::ios::binary | static_cast<std::ios::openmode>(flags));
+
+            if(outputFile.is_open()) {
+                outputFile << data;
+                outputFile.close();
+            } else {
+                LOG_ERR() << "Unable to open \"" << path << "\" for writing." << LOG_END;
+            }
+        }
+    };
+}
+#endif //USIDE_FILE_LOADER_H

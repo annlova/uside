@@ -7,10 +7,10 @@
 
 #include <mutex>
 
-namespace log {
+namespace logs {
     /**
-     * Used by log macro to ensure consecutive << calls on log will
-     * not output interleaved with calls to log on other threads.
+     * Used by logs macro to ensure consecutive << calls on logs will
+     * not output interleaved with calls to logs on other threads.
      */
     extern std::mutex gLogMutex;
 }

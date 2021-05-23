@@ -7,11 +7,6 @@
 
 #include <glad/glad.h>
 
-/**
- * @class Framebuffer
- * Sometings...
- */
-
 namespace framebuffer {
     struct FramebufferInfo {
         // Viewport variables
