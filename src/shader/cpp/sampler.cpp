@@ -4,10 +4,10 @@
 
 #include "../h/sampler.h"
 
-//#include <assertion/include/assertion_include.h>
+#include <assertion/include/assertion_include.h>
 
 GLint shader::Sampler::textureImageUnitToGlTextureImageUnit(GLint textureImageUnit) {
-//    ASSERT_MSG(textureImageUnit >= 0 && textureImageUnit <= 31, "Texture image unit can only be a value from 0 to 31.");
+    ASSERT_MSG(textureImageUnit >= 0 && textureImageUnit <= 31, "Texture image unit can only be a value from 0 to 31.");
 
     return GL_TEXTURE0 + textureImageUnit;
 }

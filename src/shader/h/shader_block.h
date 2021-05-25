@@ -2,20 +2,18 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_SHADER_BLOCK_H
-#define USIDE_SHADER_BLOCK_H
+#ifndef USIDE_SRC_SHADER_H_SHADER_BLOCK_H
+#define USIDE_SRC_SHADER_H_SHADER_BLOCK_H
 
 #include <cstdint>
 #include <array>
 #include <vector>
+#include <string>
 
 #include "active_variable.h"
 
 namespace shader {
     struct ShaderBlock {
-
-        ShaderBlock();
-
         GLuint mIndex;
         std::uint64_t mHashedName;
 
@@ -30,7 +28,9 @@ namespace shader {
         GLint mReferencedByFragment;
         GLint mReferencedByCompute;
 
-        std::vector<ActiveVariable> mActiveVariables;
+        std::vector<ActiveVariable> mActiveVariables{};
+
+        std::string mName;
 
         /** List of all property types of a uniform.
         *  OBS! The order here must be the same as the
@@ -50,4 +50,4 @@ namespace shader {
         };
     };
 }
-#endif //USIDE_SHADER_BLOCK_H
+#endif //USIDE_SRC_SHADER_H_SHADER_BLOCK_H

@@ -2,11 +2,12 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_UNIFORM_H
-#define USIDE_UNIFORM_H
+#ifndef USIDE_SRC_SHADER_H_UNIFORM_H
+#define USIDE_SRC_SHADER_H_UNIFORM_H
 
 #include <cstdint>
 #include <array>
+#include <string>
 
 #include <glad/glad.h>
 
@@ -14,7 +15,7 @@ namespace shader {
 
     struct Uniform {
         GLuint mIndex;
-        std::uint64_t mHashedName; // TODO
+        std::uint64_t mHashedName;
 
         GLint mNameLength;
         GLint mType;
@@ -32,6 +33,8 @@ namespace shader {
         GLint mReferencedByFragment;
         GLint mReferencedByCompute;
         GLint mLocation;
+
+        std::string mName;
 
         /** List of all property types of a uniform.
         *  OBS! The order here must be the same as the
@@ -63,4 +66,4 @@ namespace shader {
         static bool glTypeIsUniform(GLint glType);
     };
 }
-#endif //USIDE_UNIFORM_H
+#endif //USIDE_SRC_SHADER_H_UNIFORM_H

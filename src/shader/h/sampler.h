@@ -2,8 +2,8 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_SAMPLER_H
-#define USIDE_SAMPLER_H
+#ifndef USIDE_SRC_SHADER_H_SAMPLER_H
+#define USIDE_SRC_SHADER_H_SAMPLER_H
 
 #include <glad/glad.h>
 
@@ -30,4 +30,4 @@ namespace shader {
         static bool glTypeIsSampler(GLint glType);
     };
 }
-#endif //USIDE_SAMPLER_H
+#endif //USIDE_SRC_SHADER_H_SAMPLER_H

@@ -115,7 +115,7 @@ namespace framebuffer {
         static GLuint msBoundHandle;
 
         /// Value indicating that no framebuffer is currently bound (even though technically this is not possible).
-        static constexpr GLuint msBoundHandleUnboundValue = UINT_MAX;
+        static constexpr GLuint mscBoundHandleUnboundValue = UINT_MAX;
 
         /// OpenGL handle.
         GLuint mHandle;

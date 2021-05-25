@@ -2,8 +2,8 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_UNIFORM_TYPE_H
-#define USIDE_UNIFORM_TYPE_H
+#ifndef USIDE_SRC_SHADER_H_UNIFORM_TYPE_H
+#define USIDE_SRC_SHADER_H_UNIFORM_TYPE_H
 
 namespace shader {
     enum UniformType : unsigned int {
@@ -12,4 +12,4 @@ namespace shader {
         IMAGE
     };
 }
-#endif //USIDE_UNIFORM_TYPE_H
+#endif //USIDE_SRC_SHADER_H_UNIFORM_TYPE_H

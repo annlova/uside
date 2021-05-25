@@ -2,8 +2,8 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_SHADER_PROGRAM_H
-#define USIDE_SHADER_PROGRAM_H
+#ifndef USIDE_SRC_SHADER_H_SHADER_PROGRAM_H
+#define USIDE_SRC_SHADER_H_SHADER_PROGRAM_H
 
 #include <cstdint>
 #include <unordered_map>
@@ -28,15 +28,8 @@ namespace shader {
         const ShaderProgram& operator=(ShaderProgram&& program) = delete;
 
     public:
-        GLuint mHandle;
-
-    public:
-        std::unordered_map<std::uint64_t, Attribute>     mAttributes;
-        std::unordered_map<std::uint64_t, Image>         mImages;
-        std::unordered_map<std::uint64_t, Sampler>       mSamplers;
-        std::unordered_map<std::uint64_t, ShaderBlock>   mShaderStorageBlocks;
-        std::unordered_map<std::uint64_t, ShaderBlock>   mUniformBlocks;
-        std::unordered_map<std::uint64_t, Uniform>       mUniforms;
+        void bind() const;
+        void unbind() const;
 
     public:
         const Attribute& getAttribute(std::uint64_t hashedName);
@@ -45,6 +38,20 @@ namespace shader {
         const ShaderBlock& getShaderStorageBlock(std::uint64_t hashedName);
         const ShaderBlock& getUniformBlock(std::uint64_t hashedName);
         const Uniform& getUniform(std::uint64_t hashedName);
+
+    public:
+        GLuint mHandle;
+
+        std::unordered_map<std::uint64_t, Attribute>     mAttributes;
+        std::unordered_map<std::uint64_t, Image>         mImages;
+        std::unordered_map<std::uint64_t, Sampler>       mSamplers;
+        std::unordered_map<std::uint64_t, ShaderBlock>   mShaderStorageBlocks;
+        std::unordered_map<std::uint64_t, ShaderBlock>   mUniformBlocks;
+        std::unordered_map<std::uint64_t, Uniform>       mUniforms;
+
+    private:
+        static GLuint msBoundHandle;
+        static constexpr GLuint mscBoundHandleUnboundValue = 0;
     };
 }
-#endif //USIDE_SHADER_PROGRAM_H
+#endif //USIDE_SRC_SHADER_H_SHADER_PROGRAM_H

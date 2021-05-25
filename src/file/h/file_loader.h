@@ -2,12 +2,14 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_FILE_LOADER_H
-#define USIDE_FILE_LOADER_H
+#ifndef USIDE_SRC_FILE_H_FILE_LOADER_H
+#define USIDE_SRC_FILE_H_FILE_LOADER_H
 
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 #include <logs/include/log_include.h>
 
@@ -36,7 +38,14 @@ namespace file {
             std::ifstream input(path, std::ios::in | std::ios::binary);
 
             if (input.is_open()) {
-                std::vector<std::byte> bytes((std::istreambuf_iterator<char>(input)),(std::istreambuf_iterator<char>()));
+                auto initialFilePosition = input.tellg();
+                input.seekg(0, std::ios::end);
+                auto fileSize = input.tellg() - initialFilePosition;
+                input.seekg(initialFilePosition);
+
+                std::vector<std::byte> bytes(fileSize);
+                std::transform((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()), bytes.begin(), [](char c) { return std::byte(c); });
+
                 input.close();
 
                 return bytes;
@@ -70,4 +79,4 @@ namespace file {
         }
     };
 }
-#endif //USIDE_FILE_LOADER_H
+#endif //USIDE_SRC_FILE_H_FILE_LOADER_H

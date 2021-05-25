@@ -8,7 +8,7 @@
 #include <logs/include/log_include.h>
 #include <globals/debug_code_maco.h>
 
-GLuint framebuffer::Framebuffer::msBoundHandle = msBoundHandleUnboundValue; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+GLuint framebuffer::Framebuffer::msBoundHandle = mscBoundHandleUnboundValue; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 framebuffer::Framebuffer::Framebuffer(const GLsizei width, const GLsizei height)
     : mHandle{0},
@@ -123,7 +123,7 @@ void framebuffer::Framebuffer::bind() {
 
 void framebuffer::Framebuffer::markUnbound() {
     ASSERT_MSG(isBound(), "Framebuffer not bound!");
-    msBoundHandle = msBoundHandleUnboundValue;
+    msBoundHandle = mscBoundHandleUnboundValue;
 }
 
 void framebuffer::Framebuffer::clear(bool color, bool depth, bool stencil) const {

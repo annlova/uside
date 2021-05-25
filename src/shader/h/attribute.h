@@ -2,18 +2,19 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_ATTRIBUTE_H
-#define USIDE_ATTRIBUTE_H
+#ifndef USIDE_SRC_SHADER_H_ATTRIBUTE_H
+#define USIDE_SRC_SHADER_H_ATTRIBUTE_H
 
 #include <cstdint>
 #include <array>
+#include <string>
 
 #include <glad/glad.h>
 
 namespace shader {
     struct Attribute {
         GLuint mIndex;
-        std::uint64_t mHashedName; // TODO
+        std::uint64_t mHashedName;
 
         GLint mNameLength;
         GLint mType;
@@ -27,6 +28,8 @@ namespace shader {
         GLint mLocation;
         GLint mIsPerPatch;
         GLint mLocationComponent;
+
+        std::string mName;
 
         /** List of all property types of an attribute.
         *  OBS! The order here must be the same as the
@@ -47,4 +50,4 @@ namespace shader {
         };
     };
 }
-#endif //USIDE_ATTRIBUTE_H
+#endif //USIDE_SRC_SHADER_H_ATTRIBUTE_H

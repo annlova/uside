@@ -2,8 +2,8 @@
 // Created by anton on 2021-05-23.
 //
 
-#ifndef USIDE_IMAGE_H
-#define USIDE_IMAGE_H
+#ifndef USIDE_SRC_SHADER_H_IMAGE_H
+#define USIDE_SRC_SHADER_H_IMAGE_H
 
 #include <glad/glad.h>
 
@@ -24,4 +24,4 @@ namespace shader {
     };
 }
 
-#endif //USIDE_IMAGE_H
+#endif //USIDE_SRC_SHADER_H_IMAGE_H

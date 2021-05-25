@@ -22,7 +22,7 @@
 /** Controls the severity level used when using LOG_DEF() macro. */
 #define USIDE_LOG_DEFAULT_SEVERITY() logs::INF
 
-#include <log/h/log_flag.h>
+#include <array>
 
 namespace logs {
     constexpr std::array<unsigned int, 6> gcLogSeverityLevelConsoleTextAttribute = {
@@ -54,11 +54,5 @@ namespace logs {
 
     /** Used to format time for output title bar. */
     inline constexpr auto gcLogTimeTitleFormat     = "%H:%M:%S";
-
-    inline constexpr LogFlag gcLogFlagNewLine{0};
-    inline constexpr LogFlag gcLogFlagPad{1};
-    inline constexpr LogFlag gcLogFlagDec{2};
-    inline constexpr LogFlag gcLogFlagHex{3};
-    inline constexpr LogFlag gcLogFlagEnd{4};
 }
 #endif //USIDE_SRC_CONFIGS_LOGGING_LOGGING_CONFIG_H

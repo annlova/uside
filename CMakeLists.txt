@@ -7,6 +7,22 @@ file(GLOB_RECURSE SOURCE_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 add_executable(uside ${SOURCE_FILES})
 
+set(source_dir "${CMAKE_SOURCE_DIR}/res")
+set(dest_dir "${CMAKE_BINARY_DIR}/res")
+
+## Copy changed files from res to the binary folder
+add_custom_target(
+        copy_res_directory ALL
+        COMMAND ${CMAKE_COMMAND}
+        -D src_dir=${source_dir}
+        -D dst_dir=${dest_dir}
+        -P "${CMAKE_SOURCE_DIR}/cmake/update_directory.cmake"
+        COMMENT "Copy res directory to build tree"
+        VERBATIM
+)
+
+add_dependencies(uside copy_res_directory)
+
 ##########    DEBUG_BREAK    ##########
 set(DEBUG_BREAK_DIR "${CMAKE_SOURCE_DIR}/libraries/debug_break")
 target_include_directories(${PROJECT_NAME} PRIVATE ${DEBUG_BREAK_DIR}/include)
@@ -24,11 +40,13 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 
 ##########    GLAD    ##########
 set(GLAD_DIR "${CMAKE_SOURCE_DIR}/libraries/glad")
-add_library("glad" "${GLAD_DIR}/src/glad.c" src/shader/include/shader_include.h src/shader/h/shader_program_factory.h src/shader/h/attribute.h src/shader/h/uniform.h src/shader/cpp/uniform.cpp src/shader/h/image.h src/shader/cpp/image.cpp src/shader/h/sampler.h src/shader/cpp/sampler.cpp src/shader/h/shader_block.h src/shader/h/active_variable.h src/shader/cpp/shader_block.cpp src/shader/h/uniform_type.h src/shader/h/shader_program_resource_factory.h src/shader/cpp/shader_program_resource_factory.cpp src/string/h/string_hash_crc64.h src/string/include/string_hash_include.h src/shader/h/shader_program.h src/shader/cpp/shader_program.cpp src/file/h/file_flags.h src/file/h/file_loader.h src/file/include/file_include.h)
+add_library("glad" "${GLAD_DIR}/src/glad.c")
 target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+##########    PROJECT SETUP    #########
+target_include_directories(
+        ${PROJECT_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}/src
 )
