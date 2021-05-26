@@ -4,6 +4,7 @@
 
 #include "../h/state.h"
 
+#include <configs/parser_config.h>
 #include <logs/include/log_include.h>
 
 std::size_t parser::StateHasher::operator()(const parser::State& state) const {
@@ -19,16 +20,16 @@ bool parser::State::operator==(const parser::State& other) const {
     return mItems == other.mItems;
 }
 
-void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<Token*, std::vector<int>>& rulesByCategory) {
+void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<Symbol*, std::vector<int>>& rulesByCategory) {
     bool itemsAdded = false;
 
     for (auto& item: mItems) {
         if (item.mcIndex < item.mcRule->mcPrd.size() &&
             !item.mcRule->mcPrd[item.mcIndex]->mcTerminal) {
             // Next symbol exists and is non-terminal - add new items to the new state for each rule the non-terminal is the category for
-            std::vector<const Token*> lookaheads;
+            std::vector<const Symbol*> lookaheads;
             if (item.mcIndex + 1 == item.mcRule->mcPrd.size()) {
-                lookaheads.push_back(item.mLookahead);
+                lookaheads.push_back(item.mcLookahead);
             } else {
                 auto lookahead = item.mcRule->mcPrd[item.mcIndex + 1];
                 if (lookahead->mcTerminal) {
@@ -41,11 +42,11 @@ void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<T
                         searchSet.insert(e);
                     }
                     for (int i = 0; i < search.size(); i++) {
-                        auto* token = rules[i].mcPrd[0];
-                        if (token->mcTerminal) {
-                            lookaheads.push_back(token);
+                        auto* symbol = rules[i].mcPrd[0];
+                        if (symbol->mcTerminal) {
+                            lookaheads.push_back(symbol);
                         } else {
-                            for (auto e: rulesByCategory[token]) {
+                            for (auto e: rulesByCategory[symbol]) {
                                 auto inserted = searchSet.insert(e);
                                 if (inserted.second) {
                                     search.push_back(e);
@@ -77,18 +78,18 @@ void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<T
 
 void parser::State::findNextStates(std::vector<const State*>& table,
                                    const std::vector<Rule>& rules,
-                                   std::unordered_map<Token*, std::vector<int>>& rulesByCategory,
+                                   std::unordered_map<Symbol*, std::vector<int>>& rulesByCategory,
                                    std::unordered_set<State, StateHasher>& states) const {
     // Sort the states existing rules by category. Each category will create a new state.
-    std::unordered_map<Token*, std::vector<RuleItem>> itemsByCategory;
+    std::unordered_map<Symbol*, std::vector<RuleItem>> itemsByCategory;
     for (auto& item: mItems) {
         auto rule = item.mcRule;
         auto index = item.mcIndex;
         auto symbol = rule->mcPrd[index];
-        auto lookahead = item.mLookahead;
+        auto lookahead = item.mcLookahead;
 
         if (index < rule->mcPrd.size() &&
-            symbol->mcId != gcEofTokenId) {
+            symbol->mcId != gcEofSymbolId) {
             static_cast<void>(itemsByCategory[symbol].emplace_back(rules, rule->mcId, index + 1, lookahead));
         }
     }

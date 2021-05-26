@@ -29,9 +29,9 @@ namespace parser {
 
         bool operator==(const State& other) const;
 
-        void closure(const std::vector<Rule>& rules, std::unordered_map<Token*, std::vector<int>>& rulesByCategory);
+        void closure(const std::vector<Rule>& rules, std::unordered_map<Symbol*, std::vector<int>>& rulesByCategory);
 
-        void findNextStates(std::vector<const State*>& table, const std::vector<Rule>& rules, std::unordered_map<Token*, std::vector<int>>& rulesByCategory, std::unordered_set<State, StateHasher>& states) const;
+        void findNextStates(std::vector<const State*>& table, const std::vector<Rule>& rules, std::unordered_map<Symbol*, std::vector<int>>& rulesByCategory, std::unordered_set<State, StateHasher>& states) const;
     };
 }
 

@@ -4,16 +4,15 @@
 
 #include "../h/rule_item.h"
 
-#include <iostream>
-
+#include <configs/parser_config.h>
 #include <assertion/include/assertion_include.h>
 
-parser::RuleItem::RuleItem(const std::vector<Rule>& rules, const int ruleId, const int index, const parser::Token* lookahead)
-        : mcRule(&rules[ruleId]), mcIndex(index), mLookahead(lookahead), mActionAccept(false), mActionReduce(false) {
+parser::RuleItem::RuleItem(const std::vector<Rule>& rules, const int ruleId, const int index, const parser::Symbol* lookahead)
+        : mcRule(&rules[ruleId]), mcIndex(index), mcLookahead(lookahead), mActionAccept(false), mActionReduce(false) {
 
     // Check if this rule item will incur an accept action
     if (index < mcRule->mcPrd.size() &&
-        mcRule->mcPrd[index]->mcId == gcEofTokenId) {
+        mcRule->mcPrd[index]->mcId == gcEofSymbolId) {
         mActionAccept = true;
     }
 

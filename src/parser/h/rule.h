@@ -7,15 +7,15 @@
 
 #include <vector>
 
-#include "token.h"
+#include "symbol.h"
 
 namespace parser {
         struct Rule {
             const int mcId;
-            const Token* const mcCat;
-            const std::vector<Token*> mcPrd;
+            const Symbol* const mcCat;
+            const std::vector<Symbol*> mcPrd;
 
-            Rule(const int id, const Token* const cat, const std::vector<Token*> prd) : mcId(id), mcCat(cat), mcPrd(std::move(prd)) {}
+            Rule(const int id, const Symbol* const cat, const std::vector<Symbol*> prd) : mcId(id), mcCat(cat), mcPrd(std::move(prd)) {}
 
             bool isReductionOf(const Rule* const rule, int index) const;
         };

@@ -1,0 +1,133 @@
+0 Ident ^[[:upper:]]\w*[^\w] ^[[:upper:]](\w*([^\w])?)?
+0 String ^"([^\\"]|\\.)*"(.|\n|\r) ^"([^\\"]|\\.)*("((.|\n|\r))?)?
+0 Char ^'([^\\]|\\.)'(.|\n|\r) ^'(([^\\]|\\.)('((.|\n|\r))?)?)?
+0 Integer ^\d+[^\w] ^\d+[^\w]?
+0 char ^char[^\w] ^c(h(a(r([^\w])?)?)?)?
+0 coercions ^coercions[^\w] ^c(o(e(r(c(i(o(n(s([^\w])?)?)?)?)?)?)?)?)?
+0 comment ^comment[^\w] ^c(o(m(m(e(n(t([^\w])?)?)?)?)?)?)?
+0 digit ^digit[^\w] ^d(i(g(i(t([^\w])?)?)?)?)?
+0 entrypoints ^entrypoints[^\w] ^e(n(t(r(y(p(o(i(n(t(s([^\w])?)?)?)?)?)?)?)?)?)?)?
+0 eps ^eps[^\w] ^e(p(s([^\w])?)?)?
+0 internal ^internal[^\w] ^i(n(t(e(r(n(a(l([^\w])?)?)?)?)?)?)?)?
+0 layout ^layout[^\w] ^l(a(y(o(u(t([^\w])?)?)?)?)?)?
+0 letter ^letter[^\w] ^l(e(t(t(e(r([^\w])?)?)?)?)?)?
+0 lower ^lower[^\w] ^l(o(w(e(r([^\w])?)?)?)?)?
+0 nonempty ^nonempty[^\w] ^n(o(n(e(m(p(t(y([^\w])?)?)?)?)?)?)?)?
+0 position ^position[^\w] ^p(o(s(i(t(i(o(n([^\w])?)?)?)?)?)?)?)?
+0 rules ^rules[^\w] ^r(u(l(e(s([^\w])?)?)?)?)?
+0 separator ^separator[^\w] ^s(e(p(a(r(a(t(o(r([^\w])?)?)?)?)?)?)?)?)?
+0 stop ^stop[^\w] ^s(t(o(p([^\w])?)?)?)?
+0 terminator ^terminator[^\w] ^t(e(r(m(i(n(a(t(o(r([^\w])?)?)?)?)?)?)?)?)?)?
+0 token ^token[^\w] ^t(o(k(e(n([^\w])?)?)?)?)?
+0 toplevel ^toplevel[^\w] ^t(o(p(l(e(v(e(l([^\w])?)?)?)?)?)?)?)?
+0 upper ^upper[^\w] ^u(p(p(e(r([^\w])?)?)?)?)?
+0 ; ^;(.|\n|\r) ^;(.|\n|\r)?
+0 . ^\.(.|\n|\r) ^\.(.|\n|\r)?
+0 ::= ^::=(.|\n|\r) ^:(:(=(.|\n|\r)?)?)?
+0 [ ^\[(.|\n|\r) ^\[(.|\n|\r)?
+0 ] ^\](.|\n|\r) ^\](.|\n|\r)?
+0 _ ^_(.|\n|\r) ^_(.|\n|\r)?
+0 ( ^\((.|\n|\r) ^\((.|\n|\r)?
+0 : ^:(.|\n|\r) ^:(.|\n|\r)?
+0 ) ^\)(.|\n|\r) ^\)(.|\n|\r)?
+0 , ^,(.|\n|\r) ^,(.|\n|\r)?
+0 | ^\|(.|\n|\r) ^\|(.|\n|\r)?
+0 - ^-(.|\n|\r) ^-(.|\n|\r)?
+0 * ^\*(.|\n|\r) ^\*(.|\n|\r)?
+0 + ^\+(.|\n|\r) ^\+(.|\n|\r)?
+0 ? ^\?(.|\n|\r) ^\?(.|\n|\r)?
+0 { ^\{(.|\n|\r) ^\{(.|\n|\r)?
+0 } ^\}(.|\n|\r) ^\}(.|\n|\r)?
+0 LineComment ^//.*(\n|\r) ^/(/(.*(\n|\r)?)?)?
+0 BlockComment ^/\*(.|\r|\n)*\*/(.|\n|\r) ^/(\*((.|\r|\n)*(\*(/((.|\n|\r))?)?)?)?)?
+1 Grammar
+1 ListDef
+1 ListItem
+1 Def
+1 Item
+1 Cat
+1 Label
+1 LabelId
+1 ProfItem
+1 IntList
+1 ListInteger
+1 ListIntList
+1 ListProfItem
+1 ListString
+1 ListRHS
+1 RHS
+1 MinimumSize
+1 Reg
+1 RegB
+1 RegC
+1 RegD
+1 ListIdent
+2 Grammar ListDef 2 pointer 2
+2 ListDef - 2 void 2
+2 ListDef Def ; ListDef 2 pointer void pointer 2
+2 ListItem - 2 void 2
+2 ListItem Item ListItem 2 pointer pointer 2
+2 Def Label . Cat ::= ListItem 2 pointer void pointer void pointer 2
+2 Def comment String 2 void pointer 2
+2 Def comment String String 2 void pointer pointer 2
+2 Def internal Label . Cat ::= ListItem 2 void pointer void pointer void pointer 2
+2 Def token Ident Reg 2 void pointer pointer 2
+2 Def position token Ident Reg 2 void void pointer pointer 2
+2 Def entrypoints ListIdent 2 void pointer 2
+2 Def separator MinimumSize Cat String 2 void pointer pointer pointer 2
+2 Def terminator MinimumSize Cat String 2 void pointer pointer pointer 2
+2 Def coercions Ident Integer 2 void pointer int 2
+2 Def rules Ident ::= ListRHS 2 void pointer void pointer 2
+2 Def layout ListString 2 void pointer 2
+2 Def layout stop ListString 2 void void pointer 2
+2 Def layout toplevel 2 void void 2
+2 Item String 2 pointer 2
+2 Item Cat 2 pointer 2
+2 Cat [ Cat ] 2 void pointer void 2
+2 Cat Ident 2 pointer 2
+2 Label LabelId 2 pointer 2
+2 Label LabelId ListProfItem 2 pointer pointer 2
+2 Label LabelId LabelId ListProfItem 2 pointer pointer pointer 2
+2 LabelId Ident 2 pointer 2
+2 LabelId _ 2 void 2
+2 LabelId [ ] 2 void void 2
+2 LabelId ( : ) 2 void void void 2
+2 LabelId ( : [ ] ) 2 void void void void 2
+2 ProfItem ( [ ListIntList ] , [ ListInteger ] ) 2 void void pointer void void void pointer void void 2
+2 IntList [ ListInteger ] 2 void pointer void 2
+2 ListInteger  - 2 void 2
+2 ListInteger Integer 2 int 2
+2 ListInteger Integer , ListInteger 2 int void pointer 2
+2 ListIntList - 2 void 2
+2 ListIntList IntList 2 pointer 2
+2 ListIntList IntList , ListIntList 2 pointer void pointer 2
+2 ListProfItem ProfItem 2 pointer 2
+2 ListProfItem ProfItem ListProfItem 2 pointer pointer 2
+2 ListString String 2 pointer 2
+2 ListString String , ListString 2 pointer void pointer 2
+2 ListRHS RHS 2 pointer 2
+2 ListRHS RHS | ListRHS 2 pointer void pointer 2
+2 RHS ListItem 2 pointer 2
+2 MinimumSize nonempty 2 void 2
+2 MinimumSize - 2 void 2
+2 Reg RegB 2 pointer 2
+2 RegB RegB | RegC 2 pointer void pointer 2
+2 RegB RegC - RegC 2 pointer void pointer 2
+2 RegB RegC 2 pointer 2
+2 RegC RegC RegD 2 pointer pointer 2
+2 RegC RegD 2 pointer 2
+2 RegD RegD * 2 pointer void 2
+2 RegD RegD + 2 pointer void 2
+2 RegD RegD ? 2 pointer void 2
+2 RegD eps 2 void 2
+2 RegD Char 2 char 2
+2 RegD [ String ] 2 void pointer void 2
+2 RegD { String } 2 void pointer void 2
+2 RegD digit 2 void 2
+2 RegD letter 2 void 2
+2 RegD upper 2 void 2
+2 RegD lower 2 void 2
+2 RegD char 2 void 2
+2 RegD ( Reg ) 2 void pointer void 2
+2 ListIdent Ident 2 pointer 2
+2 ListIdent Ident , ListIdent 2 pointer void pointer 2
