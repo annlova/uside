@@ -38,6 +38,8 @@ namespace parser {
         void loadParserInfoNonTerminalInfo(std::istringstream& lineStream);
         void loadParserInfoRuleInfo(std::istringstream& lineStream);
 
+    private:
+        static int stringToInt(std::string& str);
     public:
         const std::vector<Rule>& getRules() const { return mRules; }
         const std::unordered_map<Symbol*, std::vector<int>>& getRulesByCategory() const { return mRulesByCategory; }

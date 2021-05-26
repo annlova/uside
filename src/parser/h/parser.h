@@ -31,11 +31,25 @@ namespace parser {
             tokenizer.loadSourceCode(sourceCode);
 
             auto& idToString = tokenizer.getSymbolIdToNameMap();
+            auto& symbols = tokenizer.getSymbols();
 
-            int id = -1;
-            while ((id = tokenizer.next().mcId) != gcEofSymbolId) {
-                ASSERT(id > -1);
-                LOG() << idToString.at(id) << LOG_END;
+            Token token(0, nullptr);
+            while ((token = tokenizer.next()) != symbols[gcEofSymbolId]) {
+                auto type = symbols[token.mId].mcType;
+                switch (type) {
+                    case STRING:
+                        LOG() << idToString.at(token.mId) << " (\"" << static_cast<const char*>(token.mData) << "\")" << LOG_END;
+                        break;
+                    case CHAR:
+                        LOG() << idToString.at(token.mId) << " (\'" << *reinterpret_cast<const char*>(&token.mData) << "\')" << LOG_END;
+                        break;
+                    case INT:
+                        LOG() << idToString.at(token.mId) << " (" << *reinterpret_cast<const int*>(&token.mData) << ")" << LOG_END;
+                        break;
+                    case NONE:
+                        LOG() << idToString.at(token.mId) << " (void)" << LOG_END;
+                        break;
+                }
             }
 
             LOG() << "End of file reached!" << LOG_END;
@@ -123,19 +137,19 @@ namespace parser {
 //            bool accepted = false;
 //            while (!accepted) {
 //                auto& curr = tokens.back();
-//                auto& act = table[stack.back()]->mActionTableRow[curr.mcId];
+//                auto& act = table[stack.back()]->mActionTableRow[curr.mId];
 //                switch (act.mAction) {
 //                    case REDUCE:
 //                        for (int i = 0; i < rules[act.mActionPointer].mcPrd.size(); i++) {
 //                            stack.pop_back();
 //                        }
-//                        stack.push_back(table[stack.back()]->mActionTableRow[rules[act.mActionPointer].mcCat->mcId].mActionPointer);
-//                        out.push_back(rules[act.mActionPointer].mcCat->mcId);
+//                        stack.push_back(table[stack.back()]->mActionTableRow[rules[act.mActionPointer].mcCat->mId].mActionPointer);
+//                        out.push_back(rules[act.mActionPointer].mcCat->mId);
 //                        break;
 //                    case SHIFT:
 //                        tokens.pop_back();
 //                        stack.push_back(act.mActionPointer);
-//                        out.push_back(curr.mcId);
+//                        out.push_back(curr.mId);
 //                        break;
 //                    case ACCEPT:
 //                        accepted = true;

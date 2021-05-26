@@ -5,6 +5,7 @@
 #include "../h/tokenizer.h"
 
 #include <regex>
+#include <charconv>
 
 #include <configs/parser_config.h>
 #include <logs/include/log_include.h>
@@ -74,8 +75,26 @@ parser::Token parser::Tokenizer::next() {
             singleMatchLeft = true;
 
             if (std::regex_match(tokenString, mSymbols[latestMatchedSymbolId].mcRegexComplete)) {
+                void* data = nullptr;
+                switch (mSymbols[latestMatchedSymbolId].mcType) {
+                    case STRING:
+                        data = new char[tokenString.size() + 1];
+                        for (int i = 0; i < tokenString.size() + 1; i++) {
+                            static_cast<char*>(data)[i] = tokenString[i];
+                        }
+                        break;
+                    case CHAR:
+                        ASSERT(tokenString.size() == 1);
+                        data = reinterpret_cast<void*>(tokenString[0]);
+                        break;
+                    case INT:
+                        data = reinterpret_cast<void*>(stringToInt(tokenString));
+                        break;
+                    case NONE:
+                        break;
+                };
                 // Complete and only match found! Return corresponding token.
-                return {latestMatchedSymbolId, nullptr}; // TODO: Replace nullptr with actual data
+                return {latestMatchedSymbolId, data};
             }
         }
 
@@ -133,7 +152,8 @@ void parser::Tokenizer::loadParserInfoTerminalInfo(std::istringstream& lineStrea
     std::string key;
     std::string regexComplete;
     std::string regexPartial;
-    if (!(lineStream >> key >> regexComplete >> regexPartial)) {
+    std::string typeString;
+    if (!(lineStream >> key >> regexComplete >> regexPartial >> typeString)) {
         ASSERT_MSG(false, "Unable to read terminal info from parser info."); // TODO: Better error handling?
     }
 
@@ -152,7 +172,21 @@ void parser::Tokenizer::loadParserInfoTerminalInfo(std::istringstream& lineStrea
     ASSERT_MSG(insertedComplete.second, "Duplicate partial regex for terminal in parser info.");
 #endif
 
-    static_cast<void>(mSymbols.emplace_back(mSymbols.size(), regexComplete, regexPartial));
+    SymbolType type;
+    if (typeString == gcParserInfoTerminalTypeString) {
+        type = SymbolType::STRING;
+    } else if (typeString == gcParserInfoTerminalTypeChar) {
+        type = SymbolType::CHAR;
+    } else if (typeString == gcParserInfoTerminalTypeInt) {
+        type = SymbolType::INT;
+    } else if (typeString == gcParserInfoTerminalTypeVoid) {
+        type = SymbolType::NONE;
+    } else {
+        LOG_ERR() << "Can not identify terminal type \"" << typeString << "\" from parser info for key \"" << key << "\"." << LOG_END;
+        ASSERT(false); // TODO: Better error handling?
+    }
+
+    static_cast<void>(mSymbols.emplace_back(mSymbols.size(), type, regexComplete, regexPartial));
 }
 
 void parser::Tokenizer::loadParserInfoNonTerminalInfo(std::istringstream& lineStream) {
@@ -200,4 +234,13 @@ void parser::Tokenizer::loadParserInfoRuleInfo(std::istringstream& lineStream) {
 
     static_cast<void>(mRules.emplace_back(mRules.size(), categorySymbolPointer, productionSymbolsPointers));
     static_cast<void>(mRulesByCategory[categorySymbolPointer].push_back(static_cast<int>(mRules.size())));
+}
+
+int parser::Tokenizer::stringToInt(std::string &str) {
+    int parsed;
+    char* start = &str[0];
+    char* end = &str[str.size()];
+    auto result = std::from_chars(start, end, parsed);
+    ASSERT(static_cast<bool>(result.ec) && result.ptr == end); // TODO: Better error handling?
+    return parsed;
 }

@@ -7,12 +7,17 @@
 
 namespace parser {
     /// Important: Must be = 0! The end-of-file token, which is always present, always has the same id.
-    constexpr int gcEofSymbolId = 0;
+    inline constexpr int gcEofSymbolId = 0;
 
     inline constexpr auto gcParserInfoTerminalLineIdentifier = "0";
     inline constexpr auto gcParserInfoNonTerminalLineIdentifier = "1";
     inline constexpr auto gcParserInfoRuleLineIdentifier = "2";
     inline constexpr auto gcParserInfoRuleLineProductionEndIdentifier = "2";
+
+    inline constexpr auto gcParserInfoTerminalTypeString = "STRING";
+    inline constexpr auto gcParserInfoTerminalTypeChar = "CHAR";
+    inline constexpr auto gcParserInfoTerminalTypeInt = "INT";
+    inline constexpr auto gcParserInfoTerminalTypeVoid = "NONE";
 }
 
 #endif //USIDE_SRC_CONFIGS_PARSER_CONFIG_H

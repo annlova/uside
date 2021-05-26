@@ -27,7 +27,7 @@ void b(GLFWwindow *pWindow, int key, int scancode, int action, int mods) {
 
 int main() {
     // Make ANSI colors work in clion console on some systems.
-//    (void) system(("chcp " + std::to_string(CP_UTF8)).c_str());
+    (void) system(("chcp " + std::to_string(CP_UTF8)).c_str());
 
     parser::Parser p;
     return 0;

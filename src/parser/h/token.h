@@ -8,14 +8,11 @@
 #include "symbol.h"
 
 namespace parser {
-    // Forward declare Symbol
-    struct Symbol;
-
     struct Token {
-        const int mcId;
-        const void* const mcData;
+        int mId;
+        const void* mData;
 
-        Token(int id, void* data) : mcId(id), mcData{data} {}
+        Token(int id, void* data) : mId(id), mData{data} {}
 
         bool operator==(const Symbol& other) const;
         bool operator!=(const Symbol& other) const;

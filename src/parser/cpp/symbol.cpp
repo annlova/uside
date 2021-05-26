@@ -7,9 +7,9 @@
 #include <assertion/include/assertion_include.h>
 
 //bool parser::Symbol::operator==(const parser::Token& other) const {
-//    return mcId == other.mcId;
+//    return mId == other.mId;
 //}
 //
 //bool parser::Symbol::operator!=(const parser::Token& other) const {
-//    return mcId != other.mcId;
+//    return mId != other.mId;
 //}

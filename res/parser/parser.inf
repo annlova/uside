@@ -1,45 +1,45 @@
-0 Ident ^[[:upper:]]\w*[^\w] ^[[:upper:]](\w*([^\w])?)?
-0 String ^"([^\\"]|\\.)*"(.|\n|\r) ^"([^\\"]|\\.)*("((.|\n|\r))?)?
-0 Char ^'([^\\]|\\.)'(.|\n|\r) ^'(([^\\]|\\.)('((.|\n|\r))?)?)?
-0 Integer ^\d+[^\w] ^\d+[^\w]?
-0 char ^char[^\w] ^c(h(a(r([^\w])?)?)?)?
-0 coercions ^coercions[^\w] ^c(o(e(r(c(i(o(n(s([^\w])?)?)?)?)?)?)?)?)?
-0 comment ^comment[^\w] ^c(o(m(m(e(n(t([^\w])?)?)?)?)?)?)?
-0 digit ^digit[^\w] ^d(i(g(i(t([^\w])?)?)?)?)?
-0 entrypoints ^entrypoints[^\w] ^e(n(t(r(y(p(o(i(n(t(s([^\w])?)?)?)?)?)?)?)?)?)?)?
-0 eps ^eps[^\w] ^e(p(s([^\w])?)?)?
-0 internal ^internal[^\w] ^i(n(t(e(r(n(a(l([^\w])?)?)?)?)?)?)?)?
-0 layout ^layout[^\w] ^l(a(y(o(u(t([^\w])?)?)?)?)?)?
-0 letter ^letter[^\w] ^l(e(t(t(e(r([^\w])?)?)?)?)?)?
-0 lower ^lower[^\w] ^l(o(w(e(r([^\w])?)?)?)?)?
-0 nonempty ^nonempty[^\w] ^n(o(n(e(m(p(t(y([^\w])?)?)?)?)?)?)?)?
-0 position ^position[^\w] ^p(o(s(i(t(i(o(n([^\w])?)?)?)?)?)?)?)?
-0 rules ^rules[^\w] ^r(u(l(e(s([^\w])?)?)?)?)?
-0 separator ^separator[^\w] ^s(e(p(a(r(a(t(o(r([^\w])?)?)?)?)?)?)?)?)?
-0 stop ^stop[^\w] ^s(t(o(p([^\w])?)?)?)?
-0 terminator ^terminator[^\w] ^t(e(r(m(i(n(a(t(o(r([^\w])?)?)?)?)?)?)?)?)?)?
-0 token ^token[^\w] ^t(o(k(e(n([^\w])?)?)?)?)?
-0 toplevel ^toplevel[^\w] ^t(o(p(l(e(v(e(l([^\w])?)?)?)?)?)?)?)?
-0 upper ^upper[^\w] ^u(p(p(e(r([^\w])?)?)?)?)?
-0 ; ^;(.|\n|\r) ^;(.|\n|\r)?
-0 . ^\.(.|\n|\r) ^\.(.|\n|\r)?
-0 ::= ^::=(.|\n|\r) ^:(:(=(.|\n|\r)?)?)?
-0 [ ^\[(.|\n|\r) ^\[(.|\n|\r)?
-0 ] ^\](.|\n|\r) ^\](.|\n|\r)?
-0 _ ^_(.|\n|\r) ^_(.|\n|\r)?
-0 ( ^\((.|\n|\r) ^\((.|\n|\r)?
-0 : ^:(.|\n|\r) ^:(.|\n|\r)?
-0 ) ^\)(.|\n|\r) ^\)(.|\n|\r)?
-0 , ^,(.|\n|\r) ^,(.|\n|\r)?
-0 | ^\|(.|\n|\r) ^\|(.|\n|\r)?
-0 - ^-(.|\n|\r) ^-(.|\n|\r)?
-0 * ^\*(.|\n|\r) ^\*(.|\n|\r)?
-0 + ^\+(.|\n|\r) ^\+(.|\n|\r)?
-0 ? ^\?(.|\n|\r) ^\?(.|\n|\r)?
-0 { ^\{(.|\n|\r) ^\{(.|\n|\r)?
-0 } ^\}(.|\n|\r) ^\}(.|\n|\r)?
-0 LineComment ^//.*(\n|\r) ^/(/(.*(\n|\r)?)?)?
-0 BlockComment ^/\*(.|\r|\n)*\*/(.|\n|\r) ^/(\*((.|\r|\n)*(\*(/((.|\n|\r))?)?)?)?)?
+0 Ident ^[[:upper:]]\w*[^\w] ^[[:upper:]](\w*([^\w])?)? STRING
+0 String ^"([^\\"]|\\.)*"(.|\n|\r) ^"([^\\"]|\\.)*("((.|\n|\r))?)? STRING
+0 Char ^'([^\\]|\\.)'(.|\n|\r) ^'(([^\\]|\\.)('((.|\n|\r))?)?)? CHAR
+0 Integer ^\d+[^\w] ^\d+[^\w]? INT
+0 char ^char[^\w] ^c(h(a(r([^\w])?)?)?)? NONE
+0 coercions ^coercions[^\w] ^c(o(e(r(c(i(o(n(s([^\w])?)?)?)?)?)?)?)?)? NONE
+0 comment ^comment[^\w] ^c(o(m(m(e(n(t([^\w])?)?)?)?)?)?)? NONE
+0 digit ^digit[^\w] ^d(i(g(i(t([^\w])?)?)?)?)? NONE
+0 entrypoints ^entrypoints[^\w] ^e(n(t(r(y(p(o(i(n(t(s([^\w])?)?)?)?)?)?)?)?)?)?)? NONE
+0 eps ^eps[^\w] ^e(p(s([^\w])?)?)? NONE
+0 internal ^internal[^\w] ^i(n(t(e(r(n(a(l([^\w])?)?)?)?)?)?)?)? NONE
+0 layout ^layout[^\w] ^l(a(y(o(u(t([^\w])?)?)?)?)?)? NONE
+0 letter ^letter[^\w] ^l(e(t(t(e(r([^\w])?)?)?)?)?)? NONE
+0 lower ^lower[^\w] ^l(o(w(e(r([^\w])?)?)?)?)? NONE
+0 nonempty ^nonempty[^\w] ^n(o(n(e(m(p(t(y([^\w])?)?)?)?)?)?)?)? NONE
+0 position ^position[^\w] ^p(o(s(i(t(i(o(n([^\w])?)?)?)?)?)?)?)? NONE
+0 rules ^rules[^\w] ^r(u(l(e(s([^\w])?)?)?)?)? NONE
+0 separator ^separator[^\w] ^s(e(p(a(r(a(t(o(r([^\w])?)?)?)?)?)?)?)?)? NONE
+0 stop ^stop[^\w] ^s(t(o(p([^\w])?)?)?)? NONE
+0 terminator ^terminator[^\w] ^t(e(r(m(i(n(a(t(o(r([^\w])?)?)?)?)?)?)?)?)?)? NONE
+0 token ^token[^\w] ^t(o(k(e(n([^\w])?)?)?)?)? NONE
+0 toplevel ^toplevel[^\w] ^t(o(p(l(e(v(e(l([^\w])?)?)?)?)?)?)?)? NONE
+0 upper ^upper[^\w] ^u(p(p(e(r([^\w])?)?)?)?)? NONE
+0 ; ^;(.|\n|\r) ^;(.|\n|\r)? NONE
+0 . ^\.(.|\n|\r) ^\.(.|\n|\r)? NONE
+0 ::= ^::=(.|\n|\r) ^:(:(=(.|\n|\r)?)?)? NONE
+0 [ ^\[(.|\n|\r) ^\[(.|\n|\r)? NONE
+0 ] ^\](.|\n|\r) ^\](.|\n|\r)? NONE
+0 _ ^_(.|\n|\r) ^_(.|\n|\r)? NONE
+0 ( ^\((.|\n|\r) ^\((.|\n|\r)? NONE
+0 : ^:(.|\n|\r) ^:(.|\n|\r)? NONE
+0 ) ^\)(.|\n|\r) ^\)(.|\n|\r)? NONE
+0 , ^,(.|\n|\r) ^,(.|\n|\r)? NONE
+0 | ^\|(.|\n|\r) ^\|(.|\n|\r)? NONE
+0 - ^-(.|\n|\r) ^-(.|\n|\r)? NONE
+0 * ^\*(.|\n|\r) ^\*(.|\n|\r)? NONE
+0 + ^\+(.|\n|\r) ^\+(.|\n|\r)? NONE
+0 ? ^\?(.|\n|\r) ^\?(.|\n|\r)? NONE
+0 { ^\{(.|\n|\r) ^\{(.|\n|\r)? NONE
+0 } ^\}(.|\n|\r) ^\}(.|\n|\r)? NONE
+0 LineComment ^//.*(\n|\r) ^/(/(.*(\n|\r)?)?)? NONE
+0 BlockComment ^/\*(.|\r|\n)*\*/(.|\n|\r) ^/(\*((.|\r|\n)*(\*(/((.|\n|\r))?)?)?)?)? NONE
 1 Grammar
 1 ListDef
 1 ListItem
