@@ -4,14 +4,13 @@
 
 #include "../h/tokenizer.h"
 
-#include <istream>
 #include <regex>
 
 #include <configs/parser_config.h>
 #include <logs/include/log_include.h>
 #include <assertion/include/assertion_include.h>
 
-parser::Tokenizer::Tokenizer(const std::string& parserInfo) : mRules(), mRulesByCategory(), mSymbols(), mSymbolNameToIdMap() DEBUG_CODE(COMMA mSymbolRegexStrings()), mSourceCode(), mSourceCodeIndex{0} {
+parser::Tokenizer::Tokenizer(const std::string& parserInfo) : mRules(), mRulesByCategory(), mSymbols(), mSymbolNameToIdMap() DEBUG_CODE(COMMA mSymbolRegexStrings() COMMA mSymbolIdToNameMap()), mSourceCode(), mSourceCodeIndex{0} {
     loadParserInfo(parserInfo);
 }
 
@@ -26,8 +25,10 @@ parser::Token parser::Tokenizer::next() {
     auto startIndex = mSourceCodeIndex;
 
     // Keep track of which symbols are still a possible match
-    std::vector<bool> matchable(mSymbols.size(), true);
-    matchable[gcEofSymbolId] = false;
+    std::vector<bool> matchable(mSymbols.size());
+    for (int i = 0; i < matchable.size(); i++) {
+        matchable[i] = mSymbols[i].mcTerminal;
+    }
 
     // Simple optimization to skip partial matching when only a single symbol is contending
     bool singleMatchLeft = false;
@@ -36,7 +37,19 @@ parser::Token parser::Tokenizer::next() {
 
     std::string tokenString;
     while (mSourceCode[mSourceCodeIndex] != 0) {
-        tokenString += mSourceCode[mSourceCodeIndex];
+        char nextCharacter = mSourceCode[mSourceCodeIndex];
+        // Skip empty space
+        if (tokenString.empty()     && (
+            nextCharacter == ' '    ||
+            nextCharacter == '\t'   ||
+            nextCharacter == '\n'   ||
+            nextCharacter == '\r'
+            )) {
+            mSourceCodeIndex++;
+            continue;
+        }
+
+        tokenString += nextCharacter;
 
         // Count number of partial matches
         if (!singleMatchLeft) {
@@ -62,7 +75,6 @@ parser::Token parser::Tokenizer::next() {
 
             if (std::regex_match(tokenString, mSymbols[latestMatchedSymbolId].mcRegexComplete)) {
                 // Complete and only match found! Return corresponding token.
-                mSourceCodeIndex++;
                 return {latestMatchedSymbolId, nullptr}; // TODO: Replace nullptr with actual data
             }
         }
@@ -127,6 +139,7 @@ void parser::Tokenizer::loadParserInfoTerminalInfo(std::istringstream& lineStrea
 
     if (mSymbolNameToIdMap.count(key) == 0) {
         mSymbolNameToIdMap[key] = static_cast<int>(mSymbols.size());
+        DEBUG_CODE(mSymbolIdToNameMap[static_cast<int>(mSymbols.size())] = key;)
     } else {
         ASSERT_MSG(false, "Duplicate symbol keys in parser info."); // TODO: Better error handling?
     }
@@ -150,6 +163,7 @@ void parser::Tokenizer::loadParserInfoNonTerminalInfo(std::istringstream& lineSt
 
     if (mSymbolNameToIdMap.count(key) == 0) {
         mSymbolNameToIdMap[key] = static_cast<int>(mSymbols.size());
+        DEBUG_CODE(mSymbolIdToNameMap[static_cast<int>(mSymbols.size())] = key;)
     } else {
         ASSERT_MSG(false, "Duplicate symbol keys in parser info."); // TODO: Better error handling?
     }

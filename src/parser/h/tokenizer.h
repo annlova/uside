@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <istream>
 
 #include <globals/debug_code_maco.h>
 
@@ -37,6 +38,12 @@ namespace parser {
         void loadParserInfoNonTerminalInfo(std::istringstream& lineStream);
         void loadParserInfoRuleInfo(std::istringstream& lineStream);
 
+    public:
+        const std::vector<Rule>& getRules() const { return mRules; }
+        const std::unordered_map<Symbol*, std::vector<int>>& getRulesByCategory() const { return mRulesByCategory; }
+        const std::vector<Symbol>& getSymbols() const { return mSymbols; }
+        DEBUG_CODE(const std::unordered_map<int COMMA std::string>& getSymbolIdToNameMap() const { return mSymbolIdToNameMap; })
+
     private:
         /// Contains the rules of the grammar from the supplied parserInfo.
         std::vector<Rule> mRules;
@@ -50,9 +57,11 @@ namespace parser {
 
         // Used to check for regex duplicates, without only the key is checked
         DEBUG_CODE(std::unordered_set<std::string> mSymbolRegexStrings;)
+        // Used to print token keys in plain text for debugging
+        DEBUG_CODE(std::unordered_map<int COMMA std::string> mSymbolIdToNameMap;)
 
         std::string mSourceCode;
-        std::size_t mSourceCodeIndex;
+        int mSourceCodeIndex;
     };
 }
 #endif //USIDE_SRC_PARSER_H_TOKENIZER_H

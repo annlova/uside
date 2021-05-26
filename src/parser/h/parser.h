@@ -11,6 +11,7 @@
 
 #include <configs/parser_config.h>
 #include <logs/include/log_include.h>
+#include <assertion/include/assertion_include.h>
 #include <file/include/file_include.h>
 
 #include "state.h"
@@ -23,15 +24,18 @@ namespace parser {
     class Parser {
     public:
         Parser () {
-            auto parserInfo = file::FileLoader::readText("res/parser/test.inf");
+            auto parserInfo = file::FileLoader::readText("res/parser/parser.inf");
             auto sourceCode = file::FileLoader::readText("res/parser/example.bnf");
 
             Tokenizer tokenizer(parserInfo);
             tokenizer.loadSourceCode(sourceCode);
 
+            auto& idToString = tokenizer.getSymbolIdToNameMap();
+
             int id = -1;
             while ((id = tokenizer.next().mcId) != gcEofSymbolId) {
-                LOG() << "id: " << id << LOG_END;
+                ASSERT(id > -1);
+                LOG() << idToString.at(id) << LOG_END;
             }
 
             LOG() << "End of file reached!" << LOG_END;
