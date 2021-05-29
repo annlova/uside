@@ -3,25 +3,35 @@ project(uside)
 
 set(CMAKE_CXX_STANDARD 17)
 
+##########    PROJECT SETUP    #########
 file(GLOB_RECURSE SOURCE_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+# ABSYN
+set(ABSYN_DIR ${CMAKE_SOURCE_DIR}/libraries/absyn)
+file(GLOB_RECURSE ABSYN_BNF_SOURCE_FILES ${ABSYN_DIR}/bnf/*.cpp)
 
-add_executable(uside ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${ABSYN_BNF_SOURCE_FILES})
 
-set(source_dir "${CMAKE_SOURCE_DIR}/res")
-set(dest_dir "${CMAKE_BINARY_DIR}/res")
+set(res_source_dir "${CMAKE_SOURCE_DIR}/res")
+set(res_dest_dir "${CMAKE_BINARY_DIR}/res")
 
 ## Copy changed files from res to the binary folder
 add_custom_target(
         copy_res_directory ALL
         COMMAND ${CMAKE_COMMAND}
-        -D src_dir=${source_dir}
-        -D dst_dir=${dest_dir}
+        -D src_dir=${res_source_dir}
+        -D dst_dir=${res_dest_dir}
         -P "${CMAKE_SOURCE_DIR}/cmake/update_directory.cmake"
         COMMENT "Copy res directory to build tree"
         VERBATIM
 )
 
-add_dependencies(uside copy_res_directory)
+add_dependencies(${PROJECT_NAME} copy_res_directory)
+
+target_include_directories(
+        ${PROJECT_NAME} PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+        ${ABSYN_DIR}
+)
 
 ##########    DEBUG_BREAK    ##########
 set(DEBUG_BREAK_DIR "${CMAKE_SOURCE_DIR}/libraries/debug_break")
@@ -44,9 +54,3 @@ add_library("glad" "${GLAD_DIR}/src/glad.c")
 target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
-
-##########    PROJECT SETUP    #########
-target_include_directories(
-        ${PROJECT_NAME} PRIVATE
-        ${CMAKE_SOURCE_DIR}/src
-)

@@ -37,12 +37,18 @@ namespace parser {
         void loadParserInfoTerminalInfo(std::istringstream& lineStream);
         void loadParserInfoNonTerminalInfo(std::istringstream& lineStream);
         void loadParserInfoRuleInfo(std::istringstream& lineStream);
+        void loadParserInfoEmptyWordInfo(std::istringstream& lineStream);
 
     private:
+        void skipEmptySpace();
+        static bool isEmptySpace(char c);
         static int stringToInt(std::string& str);
+        static char stringToChar(std::string& str);
+        static char* stringToStringAllocation(std::string& str);
+
     public:
         const std::vector<Rule>& getRules() const { return mRules; }
-        const std::unordered_map<Symbol*, std::vector<int>>& getRulesByCategory() const { return mRulesByCategory; }
+        const std::unordered_map<const Symbol*, std::vector<int>>& getRulesByCategory() const { return mRulesByCategory; }
         const std::vector<Symbol>& getSymbols() const { return mSymbols; }
         DEBUG_CODE(const std::unordered_map<int COMMA std::string>& getSymbolIdToNameMap() const { return mSymbolIdToNameMap; })
 
@@ -50,7 +56,7 @@ namespace parser {
         /// Contains the rules of the grammar from the supplied parserInfo.
         std::vector<Rule> mRules;
         /// Contains the rules sorted by category.
-        std::unordered_map<Symbol*, std::vector<int>> mRulesByCategory;
+        std::unordered_map<const Symbol*, std::vector<int>> mRulesByCategory;
 
         /// Contains the symbols of the grammar from the supplied parserInfo.
         std::vector<Symbol> mSymbols;

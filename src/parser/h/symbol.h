@@ -27,7 +27,7 @@ namespace parser {
         const std::regex mcRegexComplete;
         const std::regex mcRegexPartial;
 
-        Symbol(int id) : mcId(id), mcTerminal(false), mcType(SymbolType::NONE), mcRegexComplete(), mcRegexPartial(){}
+        Symbol(int id, bool terminal = false) : mcId(id), mcTerminal(terminal), mcType(SymbolType::NONE), mcRegexComplete(), mcRegexPartial(){}
         Symbol(int id, SymbolType type, std::string& regexComplete, std::string& regexPartial) : mcId(id), mcTerminal(true), mcType(type),
                                                                                 mcRegexComplete(regexComplete, std::regex_constants::optimize | std::regex_constants::ECMAScript),
                                                                                 mcRegexPartial(regexPartial, std::regex_constants::optimize | std::regex_constants::ECMAScript) {}

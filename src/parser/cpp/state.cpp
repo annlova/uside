@@ -6,6 +6,7 @@
 
 #include <configs/parser_config.h>
 #include <logs/include/log_include.h>
+#include <assertion/h/assertion_macro.h>
 
 std::size_t parser::StateHasher::operator()(const parser::State& state) const {
     std::size_t sum = 0;
@@ -20,7 +21,7 @@ bool parser::State::operator==(const parser::State& other) const {
     return mItems == other.mItems;
 }
 
-void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<Symbol*, std::vector<int>>& rulesByCategory) {
+void parser::State::closure(const std::vector<Rule>& rules, const std::unordered_map<const Symbol*, std::vector<int>>& rulesByCategory) {
     bool itemsAdded = false;
 
     for (auto& item: mItems) {
@@ -37,7 +38,7 @@ void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<S
                 } else {
                     std::vector<int> search;
                     std::unordered_set<int> searchSet;
-                    for (auto e: rulesByCategory[lookahead]) {
+                    for (auto e: rulesByCategory.at(lookahead)) {
                         search.push_back(e);
                         searchSet.insert(e);
                     }
@@ -46,7 +47,7 @@ void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<S
                         if (symbol->mcTerminal) {
                             lookaheads.push_back(symbol);
                         } else {
-                            for (auto e: rulesByCategory[symbol]) {
+                            for (auto e: rulesByCategory.at(symbol)) {
                                 auto inserted = searchSet.insert(e);
                                 if (inserted.second) {
                                     search.push_back(e);
@@ -57,7 +58,7 @@ void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<S
                 }
             }
 
-            auto categoryRules = rulesByCategory[item.mcRule->mcPrd[item.mcIndex]];
+            auto categoryRules = rulesByCategory.at(item.mcRule->mcPrd[item.mcIndex]);
             for (auto ruleIndex: categoryRules) {
                 for (auto lookahead: lookaheads) {
                     auto inserted = mItems.emplace(rules, ruleIndex, 0, lookahead);
@@ -78,10 +79,10 @@ void parser::State::closure(const std::vector<Rule>& rules, std::unordered_map<S
 
 void parser::State::findNextStates(std::vector<const State*>& table,
                                    const std::vector<Rule>& rules,
-                                   std::unordered_map<Symbol*, std::vector<int>>& rulesByCategory,
+                                   const std::unordered_map<const Symbol*, std::vector<int>>& rulesByCategory,
                                    std::unordered_set<State, StateHasher>& states) const {
     // Sort the states existing rules by category. Each category will create a new state.
-    std::unordered_map<Symbol*, std::vector<RuleItem>> itemsByCategory;
+    std::unordered_map<const Symbol*, std::vector<RuleItem>> itemsByCategory;
     for (auto& item: mItems) {
         auto rule = item.mcRule;
         auto index = item.mcIndex;
@@ -101,7 +102,7 @@ void parser::State::findNextStates(std::vector<const State*>& table,
 
         bool accept = false;
         bool reduce = false;
-        int reduceRule = 0;
+        std::vector<int> reduceRules(mActionTableRow.size(), -1);
         for (auto& item : categoryItems.second) {
             auto inserted = newState.mItems.insert(item);
             if (inserted.second) {
@@ -111,7 +112,7 @@ void parser::State::findNextStates(std::vector<const State*>& table,
 
                 if (item.mActionReduce) {
                     reduce = true;
-                    reduceRule = item.mActionReduceRuleId;
+                    reduceRules[item.mcLookahead->mcId] = item.mActionReduceRuleId;
                 }
             } else {
                 LOG_WRN() << "Attempted duplicate insertion of rule item in new state." << LOG_END;
@@ -138,16 +139,17 @@ void parser::State::findNextStates(std::vector<const State*>& table,
             }
 
             if (reduce) {
-                for (auto& i : actionTableState->mActionTableRow) {
-                    if (i.mAction != Action::GOTO) {
-                        i.mAction = Action::REDUCE;
-                        i.mActionPointer = reduceRule;
+                auto& row = actionTableState->mActionTableRow;
+                for (int i = 0; i < row.size(); i++) {
+                    if (row[i].mAction != Action::GOTO && reduceRules[i] > -1) {
+                        row[i].mAction = Action::REDUCE;
+                        row[i].mActionPointer = reduceRules[i];
                     }
                 }
             }
 
             if (accept) {
-                actionTableState->mActionTableRow[0/*TODO: Change to constexpr*/] = {Action::ACCEPT, 0}; // EOF column
+                actionTableState->mActionTableRow[gcEofSymbolId] = {Action::ACCEPT, 0}; // EOF column
             }
 
             inserted.first->findNextStates(table, rules, rulesByCategory, states);

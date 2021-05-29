@@ -25,9 +25,21 @@ void b(GLFWwindow *pWindow, int key, int scancode, int action, int mods) {
     }
 }
 
+class A {
+public:
+    int _a() { return a; }
+    int _b() { return b; }
+private:
+    int a;
+    int b;
+};
+struct B {
+    A* a;
+};
+
 int main() {
     // Make ANSI colors work in clion console on some systems.
-    (void) system(("chcp " + std::to_string(CP_UTF8)).c_str());
+    (void) system(("chcp " + std::to_string(CP_UTF8) + ">nul").c_str());
 
     parser::Parser p;
     return 0;

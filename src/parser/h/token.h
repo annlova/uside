@@ -10,7 +10,7 @@
 namespace parser {
     struct Token {
         int mId;
-        const void* mData;
+        void* mData;
 
         Token(int id, void* data) : mId(id), mData{data} {}
 

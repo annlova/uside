@@ -11,7 +11,8 @@
 #include <logs/include/log_include.h>
 #include <assertion/include/assertion_include.h>
 
-parser::Tokenizer::Tokenizer(const std::string& parserInfo) : mRules(), mRulesByCategory(), mSymbols(), mSymbolNameToIdMap() DEBUG_CODE(COMMA mSymbolRegexStrings() COMMA mSymbolIdToNameMap()), mSourceCode(), mSourceCodeIndex{0} {
+parser::Tokenizer::Tokenizer(const std::string& parserInfo) : mRules(), mRulesByCategory(), mSymbols(), mSymbolNameToIdMap() DEBUG_CODE(COMMA mSymbolRegexStrings() COMMA mSymbolIdToNameMap()),
+                                                              mSourceCode(), mSourceCodeIndex{0} {
     loadParserInfo(parserInfo);
 }
 
@@ -23,6 +24,15 @@ void parser::Tokenizer::loadSourceCode(const std::string& sourceCode) {
 }
 
 parser::Token parser::Tokenizer::next() {
+    // Skip empty space
+    skipEmptySpace();
+
+    // Do an end of file check
+    if (mSourceCode[mSourceCodeIndex] == 0) {
+        return {gcEofSymbolId, nullptr};
+    }
+
+    // Remember start index for error message purpose
     auto startIndex = mSourceCodeIndex;
 
     // Keep track of which symbols are still a possible match
@@ -30,6 +40,8 @@ parser::Token parser::Tokenizer::next() {
     for (int i = 0; i < matchable.size(); i++) {
         matchable[i] = mSymbols[i].mcTerminal;
     }
+    // Remove special case of EOF symbol
+    matchable[gcEofSymbolId] = false;
 
     // Simple optimization to skip partial matching when only a single symbol is contending
     bool singleMatchLeft = false;
@@ -37,20 +49,10 @@ parser::Token parser::Tokenizer::next() {
     int latestMatchedSymbolId = -1;
 
     std::string tokenString;
+    char lookahead = mSourceCode[mSourceCodeIndex++];
     while (mSourceCode[mSourceCodeIndex] != 0) {
-        char nextCharacter = mSourceCode[mSourceCodeIndex];
-        // Skip empty space
-        if (tokenString.empty()     && (
-            nextCharacter == ' '    ||
-            nextCharacter == '\t'   ||
-            nextCharacter == '\n'   ||
-            nextCharacter == '\r'
-            )) {
-            mSourceCodeIndex++;
-            continue;
-        }
-
-        tokenString += nextCharacter;
+        tokenString += lookahead;
+        lookahead = mSourceCode[mSourceCodeIndex];
 
         // Count number of partial matches
         if (!singleMatchLeft) {
@@ -59,7 +61,7 @@ parser::Token parser::Tokenizer::next() {
             for (int symbolId = 1; symbolId < mSymbols.size(); symbolId++) {
                 auto& symbol = mSymbols[symbolId];
                 if (matchable[symbolId]) {
-                    matchable[symbolId] = std::regex_match(tokenString, symbol.mcRegexPartial);
+                    matchable[symbolId] = std::regex_match(tokenString + lookahead, symbol.mcRegexPartial);
 
                     if (matchable[symbolId]) {
                         matches++;
@@ -74,18 +76,14 @@ parser::Token parser::Tokenizer::next() {
             ASSERT(latestMatchedSymbolId > -1);
             singleMatchLeft = true;
 
-            if (std::regex_match(tokenString, mSymbols[latestMatchedSymbolId].mcRegexComplete)) {
+            if (std::regex_match(tokenString + lookahead, mSymbols[latestMatchedSymbolId].mcRegexComplete)) {
                 void* data = nullptr;
                 switch (mSymbols[latestMatchedSymbolId].mcType) {
                     case STRING:
-                        data = new char[tokenString.size() + 1];
-                        for (int i = 0; i < tokenString.size() + 1; i++) {
-                            static_cast<char*>(data)[i] = tokenString[i];
-                        }
+                        data = static_cast<void*>(stringToStringAllocation(tokenString));
                         break;
                     case CHAR:
-                        ASSERT(tokenString.size() == 1);
-                        data = reinterpret_cast<void*>(tokenString[0]);
+                        data = reinterpret_cast<void*>(stringToChar(tokenString));
                         break;
                     case INT:
                         data = reinterpret_cast<void*>(stringToInt(tokenString));
@@ -93,6 +91,7 @@ parser::Token parser::Tokenizer::next() {
                     case NONE:
                         break;
                 };
+
                 // Complete and only match found! Return corresponding token.
                 return {latestMatchedSymbolId, data};
             }
@@ -119,7 +118,12 @@ parser::Token parser::Tokenizer::next() {
 
 void parser::Tokenizer::loadParserInfo(const std::string& info) {
     // First add end-of-file (eof) symbol to the list of symbols
-    static_cast<void>(mSymbols.emplace_back(gcEofSymbolId));
+    static_cast<void>(mSymbols.emplace_back(gcEofSymbolId, true));
+    DEBUG_CODE(mSymbolIdToNameMap[gcEofSymbolId] = "EOF";)
+    // Add empty word symbol to the list of symbols
+    static_cast<void>(mSymbols.emplace_back(gcEmptyWordSymbolId, true));
+    DEBUG_CODE(mSymbolIdToNameMap[gcEmptyWordSymbolId] = "EMPTY_WORD";)
+
 
     // Go through parser info line by line
     std::istringstream infoStream(info);
@@ -127,6 +131,12 @@ void parser::Tokenizer::loadParserInfo(const std::string& info) {
     while (std::getline(infoStream, line)) {
         readParserInfoLine(line);
     }
+
+    // Add starting rule as last rule in mRules, create its category symbol
+    auto& insertedSymbol = mSymbols.emplace_back(mSymbols.size());
+    DEBUG_CODE(mSymbolIdToNameMap[mSymbols.size() - 1] = "START";)
+    auto& insertedRule = mRules.emplace_back(mRules.size(), &insertedSymbol, -1, std::initializer_list<const Symbol*>{mRules[0].mcCat, &mSymbols[gcEofSymbolId]}, std::initializer_list<bool>{false, false}); // TODO Check correct bools
+    static_cast<void>(mRulesByCategory[&insertedSymbol].push_back(insertedRule.mcId));
 }
 
 void parser::Tokenizer::readParserInfoLine(const std::string& line) {
@@ -142,6 +152,9 @@ void parser::Tokenizer::readParserInfoLine(const std::string& line) {
         return;
     } else if (word == gcParserInfoRuleLineIdentifier) {
         loadParserInfoRuleInfo(lineStream);
+        return;
+    } else if (word == gcParserInfoEmptyWordIdentifier) {
+        loadParserInfoEmptyWordInfo(lineStream);
         return;
     } else {
         LOG_WRN() << "Unidentifiable lines in parser info (will be skipped)." << LOG_END;
@@ -221,7 +234,7 @@ void parser::Tokenizer::loadParserInfoRuleInfo(std::istringstream& lineStream) {
     auto categorySymbolPointer = &mSymbols[categorySymbolId];
 
     // Find pointers to production symbols
-    std::vector<Symbol*> productionSymbolsPointers;
+    std::vector<const Symbol*> productionSymbolsPointers;
     std::string productionSymbolKey;
     for (lineStream >> productionSymbolKey; productionSymbolKey != gcParserInfoRuleLineProductionEndIdentifier; lineStream >> productionSymbolKey) {
         if (mSymbolNameToIdMap.count(productionSymbolKey) == 1) {
@@ -232,8 +245,51 @@ void parser::Tokenizer::loadParserInfoRuleInfo(std::istringstream& lineStream) {
         }
     }
 
-    static_cast<void>(mRules.emplace_back(mRules.size(), categorySymbolPointer, productionSymbolsPointers));
-    static_cast<void>(mRulesByCategory[categorySymbolPointer].push_back(static_cast<int>(mRules.size())));
+    // Find if production symbols contain data
+    std::vector<bool> productionSymbolsDataFlags;
+    std::string productionSymbolDataFlag;
+    for (lineStream >> productionSymbolDataFlag; productionSymbolDataFlag != gcParserInfoRuleLineProductionEndIdentifier; lineStream >> productionSymbolDataFlag) {
+        if (productionSymbolDataFlag == "void") {
+            productionSymbolsDataFlags.push_back(false);
+        } else {
+            productionSymbolsDataFlags.push_back(true);
+        }
+    }
+    ASSERT_MSG(productionSymbolsDataFlags.size() == productionSymbolsPointers.size(), "Parser info did not supply correct number of data flags for rule.");
+
+    std::string vtableIdString;
+    if (!(lineStream >> vtableIdString)) {
+        ASSERT_MSG(false, "Can not find rule vtable id in parser info."); // TODO: Better error handling?
+    }
+
+    auto& inserted = mRules.emplace_back(mRules.size(), categorySymbolPointer, stringToInt(vtableIdString), productionSymbolsPointers, productionSymbolsDataFlags);
+    static_cast<void>(mRulesByCategory[categorySymbolPointer].push_back(inserted.mcId));
+}
+
+void parser::Tokenizer::loadParserInfoEmptyWordInfo(std::istringstream& lineStream) {
+    std::string key;
+    if (!(lineStream >> key)) {
+        ASSERT_MSG(false, "Unable to read empty word info from parser info."); // TODO: Better error handling?
+    }
+
+    if (mSymbolNameToIdMap.count(key) == 0) {
+        mSymbolNameToIdMap[key] = gcEmptyWordSymbolId;
+    } else {
+        ASSERT_MSG(false, "Duplicate symbol keys in parser info."); // TODO: Better error handling?
+    }
+}
+
+void parser::Tokenizer::skipEmptySpace() {
+    while (isEmptySpace(mSourceCode[mSourceCodeIndex])) {
+        mSourceCodeIndex++;
+    }
+}
+
+bool parser::Tokenizer::isEmptySpace(char c) {
+    return c == ' '    ||
+           c == '\t'   ||
+           c == '\n'   ||
+           c == '\r';
 }
 
 int parser::Tokenizer::stringToInt(std::string &str) {
@@ -241,6 +297,43 @@ int parser::Tokenizer::stringToInt(std::string &str) {
     char* start = &str[0];
     char* end = &str[str.size()];
     auto result = std::from_chars(start, end, parsed);
-    ASSERT(static_cast<bool>(result.ec) && result.ptr == end); // TODO: Better error handling?
+    ASSERT(!static_cast<bool>(result.ec) && result.ptr == end); // TODO: Better error handling?
     return parsed;
+}
+
+char parser::Tokenizer::stringToChar(std::string& str) {
+    if (str.size() == 1) {
+        return str[0];
+    } else if (str.size() == 3) {
+        ASSERT(str[0] == '\'' && str[2] == '\'');
+        return str[1];
+    } else if (str.size() == 4) {
+        ASSERT(str[0] == '\'' && str[1] == '\\' && str[3] == '\'');
+        ASSERT(str[2] == '\'' || str[2] == '\"' || str[2] == '\\'); // TODO: Make more official
+        return str[2];
+    } else {
+        LOG_ERR() << "\"" << str << "\" is not parseable to a char." << LOG_END;
+        ASSERT(false); // TODO: Better error handling?
+        return 0;
+    }
+}
+
+char* parser::Tokenizer::stringToStringAllocation(std::string& str) {
+   if (str[0] == '\"') {
+       ASSERT(str[str.size() - 1] == '\"');
+       int numCharacters = str.size() - 2;
+       auto* data = new char[numCharacters + 1]; // Remove quotation marks and add \0 character
+       for (int i = 0; i < numCharacters; i++) {
+           data[i] = str[i + 1];
+       }
+       data[numCharacters] = 0;
+       return data;
+   } else {
+       auto* data = new char[str.size() + 1]; // Add \0 character
+       for (int i = 0; i < str.size(); i++) {
+           data[i] = str[i];
+       }
+       data[str.size()] = 0;
+       return data;
+   }
 }

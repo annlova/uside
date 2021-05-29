@@ -37,7 +37,7 @@ EAnd.		Exp2 ::= Exp2 "&&" Exp3 ;
 EOr.		Exp1 ::= Exp1 "||" Exp2 ;
 EAss.		Exp ::= Id "=" Exp ;
 
-coercions Exp6 ;
+coercions Exp 6 ;
 
 AExp.		Arg ::= Exp ;
 
@@ -52,7 +52,6 @@ SReturnEmp.	Stm ::= "return" ";" ;
 SBlock.		Stm ::= "{" [Stm] "}" ;
 SWhile.		Stm ::= "while" "(" Exp ")" Stm ;
 SIfElse.	Stm ::= "if" "(" Exp ")" Stm "else" Stm ;
-//SEmpty.		Stm ::= ";" ;
 
 separator nonempty StmA "," ;
 terminator  Stm "" ;

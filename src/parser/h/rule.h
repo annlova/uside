@@ -13,9 +13,21 @@ namespace parser {
         struct Rule {
             const int mcId;
             const Symbol* const mcCat;
-            const std::vector<Symbol*> mcPrd;
+            const std::vector<const Symbol*> mcPrd;
+            const std::vector<bool> mcPrdDataFlags;
+            int mNumActiveDataFlags;
+            const int mcVTableId;
 
-            Rule(const int id, const Symbol* const cat, const std::vector<Symbol*> prd) : mcId(id), mcCat(cat), mcPrd(std::move(prd)) {}
+            Rule(const int id, const Symbol* const cat, int vtableId, std::initializer_list<const Symbol*> prd, std::initializer_list<bool> prdDataFlags) : mcId(id), mcCat(cat), mcVTableId(vtableId), mcPrd(std::move(prd)), mcPrdDataFlags(std::move(prdDataFlags)), mNumActiveDataFlags(0) {
+                for (auto b: mcPrdDataFlags) {
+                    mNumActiveDataFlags++;
+                }
+            }
+            Rule(const int id, const Symbol* const cat, int vtableId, std::vector<const Symbol*> prd, std::vector<bool> prdDataFlags) : mcId(id), mcCat(cat), mcVTableId(vtableId), mcPrd(std::move(prd)), mcPrdDataFlags(std::move(prdDataFlags)), mNumActiveDataFlags(0) {
+                for (auto b: mcPrdDataFlags) {
+                    mNumActiveDataFlags++;
+                }
+            }
 
             bool isReductionOf(const Rule* const rule, int index) const;
         };
