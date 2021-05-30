@@ -20,12 +20,16 @@ namespace parser {
 
             Rule(const int id, const Symbol* const cat, int vtableId, std::initializer_list<const Symbol*> prd, std::initializer_list<bool> prdDataFlags) : mcId(id), mcCat(cat), mcVTableId(vtableId), mcPrd(std::move(prd)), mcPrdDataFlags(std::move(prdDataFlags)), mNumActiveDataFlags(0) {
                 for (auto b: mcPrdDataFlags) {
-                    mNumActiveDataFlags++;
+                    if (b) {
+                        mNumActiveDataFlags++;
+                    }
                 }
             }
             Rule(const int id, const Symbol* const cat, int vtableId, std::vector<const Symbol*> prd, std::vector<bool> prdDataFlags) : mcId(id), mcCat(cat), mcVTableId(vtableId), mcPrd(std::move(prd)), mcPrdDataFlags(std::move(prdDataFlags)), mNumActiveDataFlags(0) {
                 for (auto b: mcPrdDataFlags) {
-                    mNumActiveDataFlags++;
+                    if (b) {
+                        mNumActiveDataFlags++;
+                    }
                 }
             }
 

@@ -132,17 +132,19 @@ namespace parser {
                 switch (action.mAction) {
                     case REDUCE: {
                         auto& rule = rules[action.mActionPointer];
-                        int dataSize = rule.mNumActiveDataFlags + 1;
-                        void** data = new void*[dataSize]; // + 1 for vtable pointer
+                        int dataSize = rule.mNumActiveDataFlags + 1; // + 1 for vtable pointer
+                        void** data = new void*[dataSize];
                         auto& prds = rule.mcPrd;
                         auto& dataFlags = rule.mcPrdDataFlags;
                         int numDataPointersFilled = 0;
-                        for (int i = prds.size() - 1; i >= 0; i--) {
+                        for (int i = dataFlags.size() - 1; i >= 0; i--) {
+//                            LOG_DBG() << idToString.at(stack.top().second.mId) << LOG_END;
                             if (dataFlags[i]) {
                                 auto* temp = stack.top().second.mData;
-                                LOG_DBG() << idToString.at(stack.top().second.mId) << LOG_END;
-                                auto a = static_cast<char*>(temp);
-                                auto b = static_cast<int>(reinterpret_cast<std::intptr_t>(temp));
+//                                auto a = static_cast<char*>(temp);
+//                                auto c = static_cast<absyn::bnf::ListDef*>(temp);
+//                                auto d = static_cast<absyn::bnf::Def*>(temp);
+//                                auto b = static_cast<int>(reinterpret_cast<std::intptr_t>(temp));
                                 data[dataSize - 1 - numDataPointersFilled] = temp;
                                 numDataPointersFilled++;
                             }
@@ -155,8 +157,8 @@ namespace parser {
 //                        t = new Token(rules[action.mActionPointer].mcCat->mcId, nullptr);
 //                        printOutReduce(*t, idToString, symbols, action.mActionPointer);
 //                        delete t;
-                        Token tok(rule.mcCat->mcId, data);
-                        LOG() << idToString.at(lookahead.mId) << LOG_END;
+                        Token tok(rule.mcCat->mcId, &(*data));
+//                        LOG() << idToString.at(lookahead.mId) << LOG_END;
                         stack.push(std::make_pair(table[stack.top().first]->mActionTableRow[rule.mcCat->mcId].mActionPointer, tok));
                     }
                         break;
@@ -164,7 +166,7 @@ namespace parser {
                         if (emptyWordRead) {
                             Token tok(gcEmptyWordSymbolId, nullptr);
                             stack.push(std::make_pair(action.mActionPointer, tok));
-                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
+//                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
 //                            t = new Token(gcEmptyWordSymbolId, nullptr);
 //                            printOutShift(*t, idToString, symbols, action.mActionPointer);
 //                            delete t;
@@ -173,7 +175,7 @@ namespace parser {
 //                            out.push_back(token);
 //                            printOutShift(token, idToString, symbols, action.mActionPointer);
                             lookahead = tokenizer.next();
-                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
+//                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
 //                            printOutToken(token, idToString, symbols, action.mActionPointer);
                         }
                         break;
@@ -194,6 +196,7 @@ namespace parser {
             absyn::bnf::Grammar* grammar = reinterpret_cast<absyn::bnf::Grammar*>(stack.top().second.mData);
             LOG() << "Did this actually work?" << LOG_END;
             delete grammar;
+            LOG() << "After" << LOG_END;
 
 //            for (auto& t: out) {
 //                auto type = symbols[t.mId].mcType;

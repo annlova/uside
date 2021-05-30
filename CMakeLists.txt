@@ -9,7 +9,7 @@ file(GLOB_RECURSE SOURCE_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 set(ABSYN_DIR ${CMAKE_SOURCE_DIR}/libraries/absyn)
 file(GLOB_RECURSE ABSYN_BNF_SOURCE_FILES ${ABSYN_DIR}/bnf/*.cpp)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${ABSYN_BNF_SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${ABSYN_BNF_SOURCE_FILES} src/parser/h/bnf_interpreter.h src/parser/cpp/bnf_interpreter.cpp libraries/absyn/bnf_skeleton.h libraries/absyn/bnf_skeleton.cpp)
 
 set(res_source_dir "${CMAKE_SOURCE_DIR}/res")
 set(res_dest_dir "${CMAKE_BINARY_DIR}/res")

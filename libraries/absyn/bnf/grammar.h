@@ -8,6 +8,7 @@
 #include "list_def.h"
 
 namespace absyn::bnf {
+    template <class Return, class Argument>
     struct Grammar {
         Grammar() = default;
         virtual ~Grammar() = default;
@@ -17,10 +18,11 @@ namespace absyn::bnf {
         Grammar& operator=(Grammar& other) = delete;
         Grammar& operator=(Grammar&& other) = delete;
 
-        virtual void accept(struct GrammarVisitor* v) = 0;
+        virtual Return accept(struct GrammarVisitor* v, Argument arg) = 0;
     };
 
-    class GrammarListDef : public Grammar {
+    template <class Return, class Argument>
+    class GrammarListDef : public Grammar<Return, Argument> {
 	public:
 		GrammarListDef() : mV1{nullptr} {}
 		~GrammarListDef() override { delete mV1; }
@@ -30,14 +32,14 @@ namespace absyn::bnf {
 		GrammarListDef& operator=(GrammarListDef& other) = delete;
 		GrammarListDef& operator=(GrammarListDef&& other) = delete;
 
-        void accept(GrammarVisitor* v) override;
+        Return accept(GrammarVisitor* v, Argument arg) override;
         [[nodiscard]] const ListDef* v1() const { return mV1; }
     private:
         const ListDef* mV1;
     };
 
     struct GrammarVisitor {
-        virtual void visit(GrammarListDef* token) = 0;
+        virtual void visit(const GrammarListDef* token, ) const = 0;
     };
 
     typedef void (DestructFn)(void*);

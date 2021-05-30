@@ -4,10 +4,10 @@
 
 #include "list_def.h"
 
-void absyn::bnf::ListDefEpsilon::accept(ListDefVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListDefEpsilon::accept(ListDefVisitor& v, Env& env) const {
+    v.visit(*this, env);
 }
 
-void absyn::bnf::ListDefList::accept(ListDefVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListDefList::accept(ListDefVisitor& v, Env& env) const {
+    v.visit(*this, env);
 }

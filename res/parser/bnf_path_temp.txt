@@ -1,1 +1,1 @@
-res/parser/simple_example.bnf
+res/parser/example.bnf

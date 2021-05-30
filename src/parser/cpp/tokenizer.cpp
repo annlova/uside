@@ -12,7 +12,7 @@
 #include <assertion/include/assertion_include.h>
 
 parser::Tokenizer::Tokenizer(const std::string& parserInfo) : mRules(), mRulesByCategory(), mSymbols(), mSymbolNameToIdMap() DEBUG_CODE(COMMA mSymbolRegexStrings() COMMA mSymbolIdToNameMap()),
-                                                              mSourceCode(), mSourceCodeIndex{0} {
+                                                              mSourceCode(), mSourceCodeIndex{0}, mLineCommentSymbolId{-1}, mBlockCommentSymbolId{-1} {
     loadParserInfo(parserInfo);
 }
 
@@ -92,6 +92,11 @@ parser::Token parser::Tokenizer::next() {
                         break;
                 };
 
+                if (latestMatchedSymbolId == mLineCommentSymbolId ||
+                    latestMatchedSymbolId == mBlockCommentSymbolId) {
+                    return next();
+                }
+
                 // Complete and only match found! Return corresponding token.
                 return {latestMatchedSymbolId, data};
             }
@@ -131,6 +136,9 @@ void parser::Tokenizer::loadParserInfo(const std::string& info) {
     while (std::getline(infoStream, line)) {
         readParserInfoLine(line);
     }
+
+    ASSERT(mLineCommentSymbolId > -1);
+    ASSERT(mBlockCommentSymbolId > -1);
 
     // Add starting rule as last rule in mRules, create its category symbol
     auto& insertedSymbol = mSymbols.emplace_back(mSymbols.size());
@@ -197,6 +205,12 @@ void parser::Tokenizer::loadParserInfoTerminalInfo(std::istringstream& lineStrea
     } else {
         LOG_ERR() << "Can not identify terminal type \"" << typeString << "\" from parser info for key \"" << key << "\"." << LOG_END;
         ASSERT(false); // TODO: Better error handling?
+    }
+
+    if (key == gcParserInfoLineCommentIdentifier) {
+        mLineCommentSymbolId = static_cast<int>(mSymbols.size());
+    } else if (key == gcParserInfoBlockCommentIdentifier) {
+        mBlockCommentSymbolId = static_cast<int>(mSymbols.size());
     }
 
     static_cast<void>(mSymbols.emplace_back(mSymbols.size(), type, regexComplete, regexPartial));

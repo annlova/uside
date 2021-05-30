@@ -16,6 +16,8 @@ namespace parser {
     inline constexpr auto gcParserInfoRuleLineIdentifier = "2";
     inline constexpr auto gcParserInfoRuleLineProductionEndIdentifier = "2";
     inline constexpr auto gcParserInfoEmptyWordIdentifier = "3";
+    inline constexpr auto gcParserInfoLineCommentIdentifier = "LineComment";
+    inline constexpr auto gcParserInfoBlockCommentIdentifier = "BlockComment";
 
     inline constexpr auto gcParserInfoTerminalTypeString = "STRING";
     inline constexpr auto gcParserInfoTerminalTypeChar = "CHAR";

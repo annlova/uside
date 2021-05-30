@@ -4,6 +4,7 @@
 
 #include "grammar.h"
 
-void absyn::bnf::GrammarListDef::accept(GrammarVisitor* v) {
-    v->visit(this);
+template<class Return, class Argument>
+Return absyn::bnf::GrammarListDef<Return, Argument>::accept(absyn::bnf::GrammarVisitor* v, Argument arg) {
+    return v->visit(this, arg);
 }

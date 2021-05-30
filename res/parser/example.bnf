@@ -1,11 +1,16 @@
+// This is a great comment
 Pdefs.	Program ::= [Def] ;
 
 comment "//" ;
 comment "/*" "*/" ;
 comment "#" ;
 
+// Fantastic comment!
 token Id (letter)(letter | digit | '_')* ;
-
+/* What about a block comment?
+* is that something that you would
+* enjoy???
+*/
 TVoid.	 	Type ::= "void" ;
 TInt.	 	Type ::= "int" ;
 TBool.		Type ::= "bool" ;
@@ -64,3 +69,7 @@ separator 	Par "," ;
 DFunc.	Def ::= TypeD Id "(" [Par] ")" "{" [Stm] "}" ;
 
 separator Def "" ;
+// Holy fuk!
+/*
+* We are going crazy
+*/

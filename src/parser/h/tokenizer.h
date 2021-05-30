@@ -70,6 +70,9 @@ namespace parser {
 
         std::string mSourceCode;
         int mSourceCodeIndex;
+
+        int mLineCommentSymbolId;
+        int mBlockCommentSymbolId;
     };
 }
 #endif //USIDE_SRC_PARSER_H_TOKENIZER_H
