@@ -4,274 +4,507 @@
 
 #include "../h/bnf_interpreter.h"
 
-int parser::BnfInterpreter::interpret(absyn::bnf::Grammar* grammar) {
-    GrammarVisitor grammarVisitor;
-    grammar->accept(&grammarVisitor);
+#include <charconv>
+
+#include "../h/bnf_compiler_writer.h"
+
+int parser::BnfInterpreter::interpret(const absyn::bnf::Grammar& grammar) {
+    GrammarVisitor visitor(*this);
+    grammar.accept(visitor);
+    LOG_TRC() << "Attempting to write absyn files..." << LOG_END;
+    writeAbsyn("test");
     return 0;
 }
 
-void parser::BnfInterpreter::GrammarVisitor::visit(absyn::bnf::GrammarListDef* token) {
-    ListDefVisitor listDefVisitor;
-    token->v1()->accept(listDefVisitor);
-    a = 5;
+void parser::BnfInterpreter::writeAbsyn(const std::string& absynName) {
+    // TODO: Move to more logical place
+    std::string absynDirPath                = "res/parser/out/absyn/" + absynName + "/";
+    std::string templatesDirPath            = "res/parser/templates/";
+
+    BnfCompilerWriter writer(mscProjectName, absynName, absynDirPath, templatesDirPath, mCatLabelMap, mLabelVarMap);
+    writer.writeAbsyn();
+}
+
+void parser::BnfInterpreter::GrammarVisitor::visit(const absyn::bnf::GrammarListDef& token) {
+	LOG_TRC() << "Visiting GrammarListDef" << LOG_END;
+	ListDefVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+}
+
+void parser::BnfInterpreter::ListDefVisitor::visit(const absyn::bnf::ListDefEpsilon& token) {
+	LOG_TRC() << "Visiting ListDefEpsilon" << LOG_END;
+}
+
+void parser::BnfInterpreter::ListDefVisitor::visit(const absyn::bnf::ListDefList& token) {
+	LOG_TRC() << "Visiting ListDefList" << LOG_END;
+	DefVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    ListDefVisitor visitor2(mEnv);
+	token.v2().accept(visitor2);
+}
+
+void parser::BnfInterpreter::ListItemVisitor::visit(const absyn::bnf::ListItemEpsilon& token) {
+	LOG_TRC() << "Visiting ListItemEpsilon" << LOG_END;
+	mEnv.mReturnStack->push("$Epsilon");
+}
+
+void parser::BnfInterpreter::ListItemVisitor::visit(const absyn::bnf::ListItemItemList& token) {
+	LOG_TRC() << "Visiting ListItemItemList" << LOG_END;
+	ItemVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    ListItemVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
+}
+
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefLabel& token) {
+	LOG_TRC() << "Visiting DefLabel" << LOG_END;
+    ASSERT(mEnv.mLabelReturnStack.empty());
+    ASSERT(mEnv.mCatReturnStack.empty());
+    ASSERT(mEnv.mItemReturnStack.empty());
+
+	mEnv.mReturnStack = &mEnv.mLabelReturnStack;
+	LabelVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+	mEnv.mReturnStack = &mEnv.mCatReturnStack;
+    CatVisitor visitor2(mEnv);
+	token.v2().accept(visitor2);
+	mEnv.mReturnStack = &mEnv.mItemReturnStack;
+    ListItemVisitor visitor3(mEnv);
+    token.v3().accept(visitor3); // TODO
+
+    // Gp through cat stack
+    const char* catName = nullptr;
+    while (!mEnv.mCatReturnStack.empty()) {
+        auto* str = mEnv.mCatReturnStack.top();
+        mEnv.mCatReturnStack.pop();
+        // Check if stack contains command
+        if (str[0] == '$') { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            handleCatStackCommand(str);
+        } else {
+            catName = str;
+        }
+    }
+    ASSERT(catName != nullptr);
+
+    // Go through label stack
+    const char* labelName = nullptr;
+    while (!mEnv.mLabelReturnStack.empty()) {
+        auto* str = mEnv.mLabelReturnStack.top();
+        mEnv.mLabelReturnStack.pop();
+        // Check if stack contains command
+        if (str[0] == '$') { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            handleLabelStackCommand(str); // TODO
+        } else {
+            labelName = str;
+        }
+    }
+    ASSERT(labelName != nullptr);
+
+    // Insert label into mCatLabelMap
+    {
+        auto& map = mEnv.mCatLabelMap;
+        (void) map.emplace(catName, std::unordered_set<std::string>()).first->second.insert(labelName);
+    }
+
+    // Go through item stack
+    {
+        auto& map = mEnv.mLabelVarMap;
+        auto inserted = map.emplace(labelName, std::vector<std::string>());
+        ASSERT_MSG(inserted.second, "Duplicate labels.");
+        while (!mEnv.mItemReturnStack.empty()) {
+            auto* str = mEnv.mItemReturnStack.top();
+            mEnv.mItemReturnStack.pop();
+            if (str[0] == '$') { // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                handleItemStackCommand(str, inserted.first->second);
+            } else {
+                ASSERT(false);
+            }
+        }
+    }
+}
+
+void parser::BnfInterpreter::DefVisitor::handleCatStackCommand(const std::string& cmd) {
+    if (cmd == "$List") {
+        ASSERT_MSG(false, "Not implemented."); // TODO
+    }
 }
 
-void parser::BnfInterpreter::ListDefVisitor::visit(const absyn::bnf::ListDefEpsilon& token, bnf::Env& env) const {
-
-}
-
-void parser::BnfInterpreter::ListDefVisitor::visit(const absyn::bnf::ListDefList& token, bnf::Env& env) const {
-
-}
-
-void parser::BnfInterpreter::ListItemVisitor::visit(absyn::bnf::ListItemEpsilon* token) {
-
-}
-
-void parser::BnfInterpreter::ListItemVisitor::visit(absyn::bnf::ListItemItemList* token) {
-
+void parser::BnfInterpreter::DefVisitor::handleLabelStackCommand(const std::string& cmd) {
+    ASSERT_MSG(false, "Not implemented.");
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefLabel* v) {
-
+void parser::BnfInterpreter::DefVisitor::handleItemStackCommand(const std::string& cmd, std::vector<std::string>& vec) {
+    if (cmd == "$List") {
+        ASSERT(false);
+    } else if (cmd == "$Epsilon") {
+        LOG_ERR() << "epsilon" << LOG_END;
+    } else if (cmd == "$Term") {
+        // Calculate regex
+        // TODO
+        mEnv.mItemReturnStack.pop();
+    } else if (cmd == "$NonTerm") {
+        // Insert item into mLabelVarMap
+        (void) vec.emplace_back(mEnv.mItemReturnStack.top());
+        mEnv.mItemReturnStack.pop();
+    } else {
+        ASSERT_MSG(false, "Unhandled item stack command.");
+    }
 }
-
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefLineComment* v) {
 
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefLineComment& token) {
+    LOG_TRC() << "Visiting DefLineComment" << LOG_END;
+    LOG() << token.v1() << LOG_END;
+    LOG_ERR() << "NOT IMPLEMENTED YET!" << LOG_END; // TODO
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefBlockComment* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefBlockComment& token) {
+    LOG_TRC() << "Visiting DefBlockComment" << LOG_END;
+    LOG() << token.v1() << LOG_END;
+    LOG() << token.v2() << LOG_END;
+    LOG_ERR() << "NOT IMPLEMENTED YET!" << LOG_END; // TODO
 }
-
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefInternal* v) {
 
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefInternal& token) {
+	LOG_TRC() << "Visiting DefInternal" << LOG_END;
+	LabelVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    CatVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
+    ListItemVisitor visitor3(mEnv);
+    token.v3().accept(visitor3);
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefToken* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefToken& token) {
+	LOG_TRC() << "Visiting DefToken" << LOG_END;
+	LOG() << token.v1() << LOG_END;
+	RegVisitor visitor2(mEnv);
+	token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefPositionToken* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefPositionToken& token) {
+	LOG_TRC() << "Visiting DefPositionToken" << LOG_END;
+    LOG() << token.v1() << LOG_END;
+    RegVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
-
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefEntryPoints* v) {
 
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefEntryPoints& token) {
+	LOG_TRC() << "Visiting DefEntryPoints" << LOG_END;
+	ListIdentVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefSeparator* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefSeparator& token) {
+	LOG_TRC() << "Visiting DefSeparator" << LOG_END;
+	LOG() << token.v3() << LOG_END;
+	MinimumSizeVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    CatVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
-
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefTerminator* v) {
 
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefTerminator& token) {
+	LOG_TRC() << "Visiting DefTerminator" << LOG_END;
+    LOG() << token.v3() << LOG_END;
+    MinimumSizeVisitor visitor1(mEnv);
+    token.v1().accept(visitor1);
+    CatVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefCoercions* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefCoercions& token) {
+	LOG_TRC() << "Visiting DefCoercions" << LOG_END;
+    LOG() << token.v1() << LOG_END;
+	LOG() << token.v2() << LOG_END;
 }
-
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefRules* v) {
 
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefRules& token) {
+	LOG_TRC() << "Visiting DefRules" << LOG_END;
+    LOG() << token.v1() << LOG_END;
+    ListRHSVisitor visitor(mEnv);
+    token.v2().accept(visitor);
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefLayout* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefLayout& token) {
+	LOG_TRC() << "Visiting DefLayout" << LOG_END;
+	ListStringVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefLayoutStop* v) {
 
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefLayoutStop& token) {
+	LOG_TRC() << "Visiting DefLayoutStop" << LOG_END;
+	ListStringVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
 
-void parser::BnfInterpreter::DefVisitor::visit(absyn::bnf::DefLayoutTopLevel* v) {
-
+void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefLayoutTopLevel& token) {
+	LOG_TRC() << "Visiting DefLayoutTopLevel" << LOG_END;
 }
 
-void parser::BnfInterpreter::ItemVisitor::visit(absyn::bnf::ItemString* token) {
-
+void parser::BnfInterpreter::ItemVisitor::visit(const absyn::bnf::ItemString& token) {
+	LOG_TRC() << "Visiting ItemString" << LOG_END;
+	LOG() << token.v1() << LOG_END;
+	mEnv.mReturnStack->push(token.v1());
+	mEnv.mReturnStack->push("$Term");
 }
-
-void parser::BnfInterpreter::ItemVisitor::visit(absyn::bnf::ItemCat* token) {
 
+void parser::BnfInterpreter::ItemVisitor::visit(const absyn::bnf::ItemCat& token) {
+	LOG_TRC() << "Visiting ItemCat" << LOG_END;
+	CatVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+	mEnv.mReturnStack->push("$NonTerm");
 }
 
-void parser::BnfInterpreter::CatVisitor::visit(absyn::bnf::CatSquare* token) {
-
+void parser::BnfInterpreter::CatVisitor::visit(const absyn::bnf::CatSquare& token) {
+	LOG_TRC() << "Visiting CatSquare" << LOG_END;
+	CatVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+	mEnv.mReturnStack->push("$List");
 }
-
-void parser::BnfInterpreter::CatVisitor::visit(absyn::bnf::CatIdent* token) {
 
+void parser::BnfInterpreter::CatVisitor::visit(const absyn::bnf::CatIdent& token) {
+	LOG_TRC() << "Visiting CatIdent" << LOG_END;
+	LOG() << token.v1() << LOG_END;
+	mEnv.mReturnStack->push(token.v1());
 }
 
-void parser::BnfInterpreter::LabelVisitor::visit(absyn::bnf::LabelLabelId* token) {
-
+void parser::BnfInterpreter::LabelVisitor::visit(const absyn::bnf::LabelLabelId& token) {
+	LOG_TRC() << "Visiting LabelLabelId" << LOG_END;
+	LabelIdVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::LabelVisitor::visit(absyn::bnf::LabelLabelIdListProfItem* token) {
 
+void parser::BnfInterpreter::LabelVisitor::visit(const absyn::bnf::LabelLabelIdListProfItem& token) {
+	LOG_TRC() << "Visiting LabelLabelIdListProfItem" << LOG_END;
+	LabelIdVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    ListProfItemVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::LabelVisitor::visit(absyn::bnf::LabelDoubleLabelIdListProfItem* token) {
-
+void parser::BnfInterpreter::LabelVisitor::visit(const absyn::bnf::LabelDoubleLabelIdListProfItem& token) {
+	LOG_TRC() << "Visiting LabelDoubleLabelIdListProfItem" << LOG_END;
+	LabelIdVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+	token.v2().accept(visitor);
+	ListProfItemVisitor visitor3(mEnv);
+	token.v3().accept(visitor3);
 }
-
-void parser::BnfInterpreter::LabelIdVisitor::visit(absyn::bnf::LabelIdIdent* token) {
 
+void parser::BnfInterpreter::LabelIdVisitor::visit(const absyn::bnf::LabelIdIdent& token) {
+	LOG_TRC() << "Visiting LabelIdIdent" << LOG_END;
+	LOG() << token.v1() << LOG_END;
+	mEnv.mReturnStack->push(token.v1());
 }
 
-void parser::BnfInterpreter::LabelIdVisitor::visit(absyn::bnf::LabelIdUnderscore* token) {
-
+void parser::BnfInterpreter::LabelIdVisitor::visit(const absyn::bnf::LabelIdUnderscore& token) {
+	LOG_TRC() << "Visiting LabelIdUnderscore" << LOG_END;
+	LOG_ERR() << "NOT IMPLEMENTED!" << LOG_END;
 }
 
-void parser::BnfInterpreter::LabelIdVisitor::visit(absyn::bnf::LabelIdSquareBrackets* token) {
-
+void parser::BnfInterpreter::LabelIdVisitor::visit(const absyn::bnf::LabelIdSquareBrackets& token) {
+	LOG_TRC() << "Visiting LabelIdSquareBrackets" << LOG_END;
+    LOG_ERR() << "NOT IMPLEMENTED!" << LOG_END;
 }
-
-void parser::BnfInterpreter::LabelIdVisitor::visit(absyn::bnf::LabelIdBracketsColon* token) {
 
+void parser::BnfInterpreter::LabelIdVisitor::visit(const absyn::bnf::LabelIdBracketsColon& token) {
+	LOG_TRC() << "Visiting LabelIdBracketsColon" << LOG_END;
+    LOG_ERR() << "NOT IMPLEMENTED!" << LOG_END;
 }
 
-void parser::BnfInterpreter::LabelIdVisitor::visit(absyn::bnf::LabelIdBracketsColonSquare* token) {
-
+void parser::BnfInterpreter::LabelIdVisitor::visit(const absyn::bnf::LabelIdBracketsColonSquare& token) {
+	LOG_TRC() << "Visiting LabelIdBracketsColonSquare" << LOG_END;
+    LOG_ERR() << "NOT IMPLEMENTED!" << LOG_END;
 }
-
-void parser::BnfInterpreter::ProfItemVisitor::visit(absyn::bnf::ProfItemBrackets* token) {
 
+void parser::BnfInterpreter::ProfItemVisitor::visit(const absyn::bnf::ProfItemBrackets& token) {
+	LOG_TRC() << "Visiting ProfItemBrackets" << LOG_END;
+	ListIntListVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    ListIntegerVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::IntListVisitor::visit(absyn::bnf::IntListListInteger* token) {
-
+void parser::BnfInterpreter::IntListVisitor::visit(const absyn::bnf::IntListListInteger& token) {
+	LOG_TRC() << "Visiting IntListListInteger" << LOG_END;
+	ListIntegerVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::ListIntegerVisitor::visit(absyn::bnf::ListIntegerEmpty* token) {
 
+void parser::BnfInterpreter::ListIntegerVisitor::visit(const absyn::bnf::ListIntegerEmpty& token) {
+	LOG_TRC() << "Visiting ListIntegerEmpty" << LOG_END;
 }
 
-void parser::BnfInterpreter::ListIntegerVisitor::visit(absyn::bnf::ListIntegerInteger* token) {
-
+void parser::BnfInterpreter::ListIntegerVisitor::visit(const absyn::bnf::ListIntegerInteger& token) {
+	LOG_TRC() << "Visiting ListIntegerInteger" << LOG_END;
+	LOG() << token.v1() << LOG_END;
 }
-
-void parser::BnfInterpreter::ListIntegerVisitor::visit(absyn::bnf::ListIntegerIntegerList* token) {
 
+void parser::BnfInterpreter::ListIntegerVisitor::visit(const absyn::bnf::ListIntegerIntegerList& token) {
+	LOG_TRC() << "Visiting ListIntegerIntegerList" << LOG_END;
+	LOG() << token.v1() << LOG_END;
+	ListIntegerVisitor visitor2(mEnv);
+	token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::ListIntListVisitor::visit(absyn::bnf::ListIntListEpsilon* token) {
-
+void parser::BnfInterpreter::ListIntListVisitor::visit(const absyn::bnf::ListIntListEpsilon& token) {
+	LOG_TRC() << "Visiting ListIntListEpsilon" << LOG_END;
 }
 
-void parser::BnfInterpreter::ListIntListVisitor::visit(absyn::bnf::ListIntListIntList* token) {
-
+void parser::BnfInterpreter::ListIntListVisitor::visit(const absyn::bnf::ListIntListIntList& token) {
+	LOG_TRC() << "Visiting ListIntListIntList" << LOG_END;
+	IntListVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::ListIntListVisitor::visit(absyn::bnf::ListIntListIntListList* token) {
 
+void parser::BnfInterpreter::ListIntListVisitor::visit(const absyn::bnf::ListIntListIntListList& token) {
+	LOG_TRC() << "Visiting ListIntListIntListList" << LOG_END;
+	IntListVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    ListIntListVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::ListProfItemVisitor::visit(absyn::bnf::ListProfItemProfItem* token) {
-
+void parser::BnfInterpreter::ListProfItemVisitor::visit(const absyn::bnf::ListProfItemProfItem& token) {
+	LOG_TRC() << "Visiting ListProfItemProfItem" << LOG_END;
+	ProfItemVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::ListProfItemVisitor::visit(absyn::bnf::ListProfItemList* token) {
 
+void parser::BnfInterpreter::ListProfItemVisitor::visit(const absyn::bnf::ListProfItemList& token) {
+	LOG_TRC() << "Visiting ListProfItemList" << LOG_END;
+    ProfItemVisitor visitor1(mEnv);
+    token.v1().accept(visitor1);
+    ListProfItemVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::ListStringVisitor::visit(absyn::bnf::ListStringString* token) {
-
+void parser::BnfInterpreter::ListStringVisitor::visit(const absyn::bnf::ListStringString& token) {
+	LOG_TRC() << "Visiting ListStringString" << LOG_END;
+	LOG() << token.v1() << LOG_END;
 }
-
-void parser::BnfInterpreter::ListStringVisitor::visit(absyn::bnf::ListStringList* token) {
 
+void parser::BnfInterpreter::ListStringVisitor::visit(const absyn::bnf::ListStringList& token) {
+	LOG_TRC() << "Visiting ListStringList" << LOG_END;
+	LOG() << token.v1() << LOG_END;
+    ListStringVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::ListRHSVisitor::visit(absyn::bnf::ListRHSRHS* token) {
-
+void parser::BnfInterpreter::ListRHSVisitor::visit(const absyn::bnf::ListRHSRHS& token) {
+	LOG_TRC() << "Visiting ListRHSRHS" << LOG_END;
+	RHSVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::ListRHSVisitor::visit(absyn::bnf::ListRHSList* token) {
 
+void parser::BnfInterpreter::ListRHSVisitor::visit(const absyn::bnf::ListRHSList& token) {
+	LOG_TRC() << "Visiting ListRHSList" << LOG_END;
+	RHSVisitor visitor1(mEnv);
+	token.v1().accept(visitor1);
+    ListRHSVisitor visitor2(mEnv);
+    token.v2().accept(visitor2);
 }
 
-void parser::BnfInterpreter::RHSVisitor::visit(absyn::bnf::RHSListItem* token) {
-
+void parser::BnfInterpreter::RHSVisitor::visit(const absyn::bnf::RHSListItem& token) {
+	LOG_TRC() << "Visiting RHSListItem" << LOG_END;
+	ListItemVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
 
-void parser::BnfInterpreter::MinimumSizeVisitor::visit(absyn::bnf::MinimumSizeNonempty* token) {
-
+void parser::BnfInterpreter::MinimumSizeVisitor::visit(const absyn::bnf::MinimumSizeNonempty& token) {
+	LOG_TRC() << "Visiting MinimumSizeNonempty" << LOG_END;
 }
-
-void parser::BnfInterpreter::MinimumSizeVisitor::visit(absyn::bnf::MinimumSizeEpsilon* token) {
 
+void parser::BnfInterpreter::MinimumSizeVisitor::visit(const absyn::bnf::MinimumSizeEpsilon& token) {
+	LOG_TRC() << "Visiting MinimumSizeEpsilon" << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegReg* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegReg& token) {
+	LOG_TRC() << "Visiting RegReg" << LOG_END;
+	RegVisitor visitor(mEnv);
+	token.v1().accept(visitor);
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegOr* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegOr& token) {
+	LOG_TRC() << "Visiting RegOr" << LOG_END;
+	RegVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+	token.v2().accept(visitor);
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegMinus* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegMinus& token) {
+	LOG_TRC() << "Visiting RegMinus" << LOG_END;
+	RegVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+	token.v2().accept(visitor);
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegDoubleReg* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegDoubleReg& token) {
+	LOG_TRC() << "Visiting RegDoubleReg" << LOG_END;
+	RegVisitor visitor(mEnv);
+	token.v1().accept(visitor);
+	token.v2().accept(visitor);
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegStar* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegStar& token) {
+	LOG_TRC() << "Visiting RegStar" << LOG_END;
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegPlus* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegPlus& token) {
+	LOG_TRC() << "Visiting RegPlus" << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegQuestion* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegQuestion& token) {
+	LOG_TRC() << "Visiting RegQuestion" << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegEps* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegEps& token) {
+	LOG_TRC() << "Visiting RegEps" << LOG_END;
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegRealChar* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegRealChar& token) {
+	LOG_TRC() << "Visiting RegRealChar" << LOG_END;
+	LOG() << token.v1() << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegSquareString* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegSquareString& token) {
+	LOG_TRC() << "Visiting RegSquareString" << LOG_END;
+	LOG() << token.v1() << LOG_END;
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegCurlyString* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegCurlyString& token) {
+	LOG_TRC() << "Visiting RegCurlyString" << LOG_END;
+    LOG() << token.v1() << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegDigit* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegDigit& token) {
+	LOG_TRC() << "Visiting RegDigit" << LOG_END;
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegLetter* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegLetter& token) {
+	LOG_TRC() << "Visiting RegLetter" << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegUpper* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegUpper& token) {
+	LOG_TRC() << "Visiting RegUpper" << LOG_END;
 }
-
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegLower* token) {
 
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegLower& token) {
+	LOG_TRC() << "Visiting RegLower" << LOG_END;
 }
 
-void parser::BnfInterpreter::RegVisitor::visit(absyn::bnf::RegChar* token) {
-
+void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegChar& token) {
+	LOG_TRC() << "Visiting RegChar" << LOG_END;
 }
 
-void parser::BnfInterpreter::ListIdentVisitor::visit(absyn::bnf::ListIdentIdent* token) {
-
+void parser::BnfInterpreter::ListIdentVisitor::visit(const absyn::bnf::ListIdentIdent& token) {
+	LOG_TRC() << "Visiting ListIdentIdent" << LOG_END;
+	LOG() << token.v1() << LOG_END;
 }
-
-void parser::BnfInterpreter::ListIdentVisitor::visit(absyn::bnf::ListIdentIdentList* token) {
 
+void parser::BnfInterpreter::ListIdentVisitor::visit(const absyn::bnf::ListIdentIdentList& token) {
+	LOG_TRC() << "Visiting ListIdentIdentList" << LOG_END;
+    LOG() << token.v1() << LOG_END;
+	ListIdentVisitor visitor2(mEnv);
+	token.v2().accept(visitor2);
 }

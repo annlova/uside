@@ -21,6 +21,7 @@
 #include "rule_item.h"
 #include "symbol.h"
 #include "tokenizer.h"
+#include "bnf_interpreter.h"
 
 namespace parser {
     class Parser {
@@ -194,9 +195,9 @@ namespace parser {
             LOG() << "Parsing complete. Output:" << LOG_END;
 
             absyn::bnf::Grammar* grammar = reinterpret_cast<absyn::bnf::Grammar*>(stack.top().second.mData);
-            LOG() << "Did this actually work?" << LOG_END;
+            BnfInterpreter interpreter;
+            interpreter.interpret(*grammar);
             delete grammar;
-            LOG() << "After" << LOG_END;
 
 //            for (auto& t: out) {
 //                auto type = symbols[t.mId].mcType;

@@ -4,10 +4,10 @@
 
 #include "list_ident.h"
 
-void absyn::bnf::ListIdentIdent::accept(ListIdentVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListIdentIdent::accept(ListIdentVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ListIdentIdentList::accept(ListIdentVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListIdentIdentList::accept(ListIdentVisitor& v) const {
+    v.visit(*this);
 }

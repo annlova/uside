@@ -15,7 +15,7 @@ namespace absyn::bnf {
         LabelId& operator=(LabelId& other) = delete;
         LabelId& operator=(LabelId&& other) = delete;
 
-        virtual void accept(struct LabelIdVisitor* v) = 0;
+        virtual void accept(struct LabelIdVisitor& v) const = 0;
     };
 
     class LabelIdIdent : public LabelId {
@@ -28,7 +28,7 @@ namespace absyn::bnf {
 		LabelIdIdent& operator=(LabelIdIdent& other) = delete;
 		LabelIdIdent& operator=(LabelIdIdent&& other) = delete;
 
-        void accept(LabelIdVisitor* v) override;
+        void accept(LabelIdVisitor&  v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -36,34 +36,34 @@ namespace absyn::bnf {
 
     class LabelIdUnderscore : public LabelId {
 	public:
-        void accept(LabelIdVisitor* v) override;
+        void accept(LabelIdVisitor&  v) const override;
     };
 
     class LabelIdSquareBrackets : public LabelId {
 	public:
-        void accept(LabelIdVisitor* v) override;
+        void accept(LabelIdVisitor&  v) const override;
     };
 
     class LabelIdBracketsColon : public LabelId {
 	public:
-        void accept(LabelIdVisitor* v) override;
+        void accept(LabelIdVisitor&  v) const override;
     };
 
     class LabelIdBracketsColonSquare : public LabelId {
 	public:
-        void accept(LabelIdVisitor* v) override;
+        void accept(LabelIdVisitor&  v) const override;
     };
 
     struct LabelIdVisitor {
-        virtual void visit(LabelIdIdent* token) = 0;
-        virtual void visit(LabelIdUnderscore* token) = 0;
-        virtual void visit(LabelIdSquareBrackets* token) = 0;
-        virtual void visit(LabelIdBracketsColon* token) = 0;
-        virtual void visit(LabelIdBracketsColonSquare* token) = 0;
+        virtual void visit(const LabelIdIdent& token) = 0;
+        virtual void visit(const LabelIdUnderscore& token) = 0;
+        virtual void visit(const LabelIdSquareBrackets& token) = 0;
+        virtual void visit(const LabelIdBracketsColon& token) = 0;
+        virtual void visit(const LabelIdBracketsColonSquare& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (LabelIdAcceptFn)(void*, LabelIdVisitor* v);
+    typedef void (LabelIdAcceptFn)(void*, LabelIdVisitor& v);
     struct LabelIdVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

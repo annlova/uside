@@ -24,7 +24,7 @@ namespace absyn::bnf {
         Def& operator=(Def& other) = delete;
         Def& operator=(Def&& other) = delete;
 
-        virtual void accept(struct DefVisitor* v) = 0;
+        virtual void accept(struct DefVisitor& v) const = 0;
     };
 
     class DefLabel : public Def {
@@ -37,10 +37,10 @@ namespace absyn::bnf {
 		DefLabel& operator=(DefLabel& other) = delete;
 		DefLabel& operator=(DefLabel&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const Label* v1() const { return mV1; }
-        [[nodiscard]] const Cat* v2() const { return mV2; }
-        [[nodiscard]] const ListItem* v3() const { return mV3; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const Label& v1() const { return *mV1; }
+        [[nodiscard]] const Cat& v2() const { return *mV2; }
+        [[nodiscard]] const ListItem& v3() const { return *mV3; }
     private:
         const Label* mV1;
         const Cat* mV2;
@@ -57,7 +57,7 @@ namespace absyn::bnf {
 		DefLineComment& operator=(DefLineComment& other) = delete;
 		DefLineComment& operator=(DefLineComment&& other) = delete;
 
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -73,7 +73,7 @@ namespace absyn::bnf {
 		DefBlockComment& operator=(DefBlockComment& other) = delete;
 		DefBlockComment& operator=(DefBlockComment&& other) = delete;
 
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
         [[nodiscard]] const char* v2() const { return mV2; }
     private:
@@ -91,10 +91,10 @@ namespace absyn::bnf {
 		DefInternal& operator=(DefInternal& other) = delete;
 		DefInternal& operator=(DefInternal&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const Label* v1() const { return mV1; }
-        [[nodiscard]] const Cat* v2() const { return mV2; }
-        [[nodiscard]] const ListItem* v3() const { return mV3; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const Label& v1() const { return *mV1; }
+        [[nodiscard]] const Cat& v2() const { return *mV2; }
+        [[nodiscard]] const ListItem& v3() const { return *mV3; }
     private:
         const Label* mV1;
         const Cat* mV2;
@@ -111,9 +111,9 @@ namespace absyn::bnf {
 		DefToken& operator=(DefToken& other) = delete;
 		DefToken& operator=(DefToken&& other) = delete;
 
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
-        [[nodiscard]] const Reg* v2() const { return mV2; }
+        [[nodiscard]] const Reg& v2() const { return *mV2; }
     private:
         const char* mV1;
         const Reg* mV2;
@@ -129,9 +129,9 @@ namespace absyn::bnf {
 		DefPositionToken& operator=(DefPositionToken& other) = delete;
 		DefPositionToken& operator=(DefPositionToken&& other) = delete;
 
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
-        [[nodiscard]] const Reg* v2() const { return mV2; }
+        [[nodiscard]] const Reg& v2() const { return *mV2; }
     private:
         const char* mV1;
         const Reg* mV2;
@@ -147,8 +147,8 @@ namespace absyn::bnf {
 		DefEntryPoints& operator=(DefEntryPoints& other) = delete;
 		DefEntryPoints& operator=(DefEntryPoints&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const ListIdent* v1() const { return mV1; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const ListIdent& v1() const { return *mV1; }
     private:
         const ListIdent* mV1;
     };
@@ -163,9 +163,9 @@ namespace absyn::bnf {
 		DefSeparator& operator=(DefSeparator& other) = delete;
 		DefSeparator& operator=(DefSeparator&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const MinimumSize* v1() const { return mV1; }
-        [[nodiscard]] const Cat* v2() const { return mV2; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const MinimumSize& v1() const { return *mV1; }
+        [[nodiscard]] const Cat& v2() const { return *mV2; }
         [[nodiscard]] const char* v3() const { return mV3; }
     private:
         const MinimumSize* mV1;
@@ -183,9 +183,9 @@ namespace absyn::bnf {
 		DefTerminator& operator=(DefTerminator& other) = delete;
 		DefTerminator& operator=(DefTerminator&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const MinimumSize* v1() const { return mV1; }
-        [[nodiscard]] const Cat* v2() const { return mV2; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const MinimumSize& v1() const { return *mV1; }
+        [[nodiscard]] const Cat& v2() const { return *mV2; }
         [[nodiscard]] const char* v3() const { return mV3; }
     private:
         const MinimumSize* mV1;
@@ -203,7 +203,7 @@ namespace absyn::bnf {
 		DefCoercions& operator=(DefCoercions& other) = delete;
 		DefCoercions& operator=(DefCoercions&& other) = delete;
 
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
         [[nodiscard]] int v2() const { return mV2; }
     private:
@@ -221,9 +221,9 @@ namespace absyn::bnf {
 		DefRules& operator=(DefRules& other) = delete;
 		DefRules& operator=(DefRules&& other) = delete;
 
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
-        [[nodiscard]] const ListRHS* v2() const { return mV2; }
+        [[nodiscard]] const ListRHS& v2() const { return *mV2; }
     private:
         const char* mV1;
         const ListRHS* mV2;
@@ -239,8 +239,8 @@ namespace absyn::bnf {
 		DefLayout& operator=(DefLayout& other) = delete;
 		DefLayout& operator=(DefLayout&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const ListString* v1() const { return mV1; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const ListString& v1() const { return *mV1; }
     private:
         const ListString* mV1;
     };
@@ -255,36 +255,36 @@ namespace absyn::bnf {
 		DefLayoutStop& operator=(DefLayoutStop& other) = delete;
 		DefLayoutStop& operator=(DefLayoutStop&& other) = delete;
 
-        void accept(DefVisitor* v) override;
-        [[nodiscard]] const ListString* v1() const { return mV1; }
+        void accept(DefVisitor& v) const override;
+        [[nodiscard]] const ListString& v1() const { return *mV1; }
     private:
         const ListString* mV1;
     };
 
     class DefLayoutTopLevel : public Def {
 	public:
-        void accept(DefVisitor* v) override;
+        void accept(DefVisitor& v) const override;
     };
 
     struct DefVisitor {
-        virtual void visit(DefLabel* v) = 0;
-        virtual void visit(DefLineComment* v) = 0;
-        virtual void visit(DefBlockComment* v) = 0;
-        virtual void visit(DefInternal* v) = 0;
-        virtual void visit(DefToken* v) = 0;
-        virtual void visit(DefPositionToken* v) = 0;
-        virtual void visit(DefEntryPoints* v) = 0;
-        virtual void visit(DefSeparator* v) = 0;
-        virtual void visit(DefTerminator* v) = 0;
-        virtual void visit(DefCoercions* v) = 0;
-        virtual void visit(DefRules* v) = 0;
-        virtual void visit(DefLayout* v) = 0;
-        virtual void visit(DefLayoutStop* v) = 0;
-        virtual void visit(DefLayoutTopLevel* v) = 0;
+        virtual void visit(const DefLabel& token) = 0;
+        virtual void visit(const DefLineComment& token) = 0;
+        virtual void visit(const DefBlockComment& token) = 0;
+        virtual void visit(const DefInternal& token) = 0;
+        virtual void visit(const DefToken& token) = 0;
+        virtual void visit(const DefPositionToken& token) = 0;
+        virtual void visit(const DefEntryPoints& token) = 0;
+        virtual void visit(const DefSeparator& token) = 0;
+        virtual void visit(const DefTerminator& token) = 0;
+        virtual void visit(const DefCoercions& token) = 0;
+        virtual void visit(const DefRules& token) = 0;
+        virtual void visit(const DefLayout& token) = 0;
+        virtual void visit(const DefLayoutStop& token) = 0;
+        virtual void visit(const DefLayoutTopLevel& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (DefAcceptFn)(void*, DefVisitor* v);
+    typedef void (DefAcceptFn)(void*, DefVisitor& v);
     struct DefVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

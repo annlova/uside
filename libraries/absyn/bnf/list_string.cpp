@@ -4,10 +4,10 @@
 
 #include "list_string.h"
 
-void absyn::bnf::ListStringList::accept(ListStringVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListStringList::accept(ListStringVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ListStringString::accept(ListStringVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListStringString::accept(ListStringVisitor& v) const {
+    v.visit(*this);
 }

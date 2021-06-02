@@ -1,0 +1,43 @@
+//
+// Created on $16.
+//
+
+#ifndef $8_LIBRARIES_ABSYN_$0_$1_H
+#define $8_LIBRARIES_ABSYN_$0_$1_H
+
+$2
+
+namespace absyn::$3 {
+    struct $4 {
+        $4() = default;
+        virtual ~$4() = default;
+        $4($4& $5) = delete;
+        $4($4&& $5) = delete;
+
+        $4& operator=($4& other) = delete;
+        $4& operator=($4&& other) = delete;
+
+        virtual void accept(struct $4Visitor& v) const = 0;
+    };
+
+    $6
+
+    struct $4Visitor {
+        $7
+    };
+
+    typedef void (DestructFn)(void*);
+    typedef void ($4AcceptFn)(void*, $4Visitor& v);
+    struct $4VTable {
+        DestructFn* mDestructFn1;
+        DestructFn* mDestructFn2;
+        $4AcceptFn* mAcceptFn;
+    };
+
+    inline $4VTable* getVTable($4* obj) {
+        auto** vtablePtr = reinterpret_cast<$4VTable**>(obj); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+        return *(vtablePtr);
+    }
+}
+
+#endif //$8_LIBRARIES_ABSYN_$0_$1_H

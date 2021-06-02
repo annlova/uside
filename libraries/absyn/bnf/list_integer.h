@@ -15,18 +15,18 @@ namespace absyn::bnf {
         ListInteger& operator=(ListInteger& other) = delete;
         ListInteger& operator=(ListInteger&& other) = delete;
 
-        virtual void accept(struct ListIntegerVisitor* v) = 0;
+        virtual void accept(struct ListIntegerVisitor& v) const = 0;
     };
 
     class ListIntegerEmpty : public ListInteger {
 	public:
-        void accept(ListIntegerVisitor* v) override;
+        void accept(ListIntegerVisitor& v) const override;
     };
 
     class ListIntegerInteger : public ListInteger {
 	public:
 		ListIntegerInteger() : mV1{0} {}
-        void accept(ListIntegerVisitor* v) override;
+        void accept(ListIntegerVisitor& v) const override;
         [[nodiscard]] int v1() const { return mV1; }
     private:
         int mV1;
@@ -42,22 +42,22 @@ namespace absyn::bnf {
 		ListIntegerIntegerList& operator=(ListIntegerIntegerList& other) = delete;
 		ListIntegerIntegerList& operator=(ListIntegerIntegerList&& other) = delete;
 
-        void accept(ListIntegerVisitor* v) override;
+        void accept(ListIntegerVisitor& v) const override;
         [[nodiscard]] int v1() const { return mV1; }
-        [[nodiscard]] const ListInteger* v2() const { return mV2; }
+        [[nodiscard]] const ListInteger& v2() const { return *mV2; }
     private:
         int mV1;
         const ListInteger* mV2;
     };
 
     struct ListIntegerVisitor {
-        virtual void visit(ListIntegerEmpty* token) = 0;
-        virtual void visit(ListIntegerInteger* token) = 0;
-        virtual void visit(ListIntegerIntegerList* token) = 0;
+        virtual void visit(const ListIntegerEmpty& token) = 0;
+        virtual void visit(const ListIntegerInteger& token) = 0;
+        virtual void visit(const ListIntegerIntegerList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListIntegerAcceptFn)(void*, ListIntegerVisitor* v);
+    typedef void (ListIntegerAcceptFn)(void*, ListIntegerVisitor& v);
     struct ListIntegerVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

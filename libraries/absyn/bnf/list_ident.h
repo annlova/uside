@@ -15,7 +15,7 @@ namespace absyn::bnf {
         ListIdent& operator=(ListIdent& other) = delete;
         ListIdent& operator=(ListIdent&& other) = delete;
 
-        virtual void accept(struct ListIdentVisitor* v) = 0;
+        virtual void accept(struct ListIdentVisitor& v) const = 0;
     };
 
     class ListIdentIdent : public ListIdent {
@@ -28,7 +28,7 @@ namespace absyn::bnf {
 		ListIdentIdent& operator=(ListIdentIdent& other) = delete;
 		ListIdentIdent& operator=(ListIdentIdent&& other) = delete;
 
-        void accept(ListIdentVisitor* v) override;
+        void accept(ListIdentVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -44,21 +44,21 @@ namespace absyn::bnf {
 		ListIdentIdentList& operator=(ListIdentIdentList& other) = delete;
 		ListIdentIdentList& operator=(ListIdentIdentList&& other) = delete;
 
-        void accept(ListIdentVisitor* v) override;
+        void accept(ListIdentVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
-        [[nodiscard]] const ListIdent* v2() const { return mV2; }
+        [[nodiscard]] const ListIdent& v2() const { return *mV2; }
     private:
         const char* mV1;
         const ListIdent* mV2;
     };
 
     struct ListIdentVisitor {
-        virtual void visit(ListIdentIdent* token) = 0;
-        virtual void visit(ListIdentIdentList* token) = 0;
+        virtual void visit(const ListIdentIdent& token) = 0;
+        virtual void visit(const ListIdentIdentList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListIdentAcceptFn)(void*, ListIdentVisitor* v);
+    typedef void (ListIdentAcceptFn)(void*, ListIdentVisitor& v);
     struct ListIdentVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

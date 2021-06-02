@@ -4,14 +4,14 @@
 
 #include "label.h"
 
-void absyn::bnf::LabelDoubleLabelIdListProfItem::accept(LabelVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelDoubleLabelIdListProfItem::accept(LabelVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::LabelLabelIdListProfItem::accept(LabelVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelLabelIdListProfItem::accept(LabelVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::LabelLabelId::accept(LabelVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelLabelId::accept(LabelVisitor& v) const {
+    v.visit(*this);
 }

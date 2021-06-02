@@ -1,0 +1,529 @@
+token Id            (letter)(letter | Digit | '_')* ;
+
+// VariableIdentifier:
+VarIdent.           VariableIdentifier ::= Id ;
+
+Token IntConst      (["123456789"](digit)* | '0'["01234567"]* | ("0x" | "0X")(digit | ["abcdefABCDEF"]])*) ;
+Token UIntConst     (["123456789"](digit)* | '0'["01234567"]* | ("0x" | "0X")(digit | ["abcdefABCDEF"]])*)('u' | 'U') ;
+Token FloatConst    ((digit* ’.’ Digit+ | Digit+ '.' Digit*) (((’e’ | 'E') (’-’ | '+'))? Digit+)?)(["fF"] | Eps) ; // TODO FIX
+Token BoolConst     ("true" | "false") ;
+Token DoubleConst   ((digit* ’.’ Digit+ | Digit+ '.' Digit*) (((’e’ | 'E') (’-’ | '+'))? Digit+)?)("lf" | "LF") ; // TODO FIX
+
+// PrimaryExpression
+PriExpVarIdent.     PrimaryExpression ::= VariableIdentifier ;
+PriExpIntConst.     PrimaryExpression ::= IntConst ;
+PriExpUIntConst.    PrimaryExpression ::= UIntConst ;
+PriExpFloatConst.   PrimaryExpression ::= FloatConst ;
+PriExpBoolConst.    PrimaryExpression ::= BoolConst ;
+PriExpDoubleConst.  PrimaryExpression ::= DoubleConst ;
+PriExpParenthesis.     PrimaryExpression ::= "(" Expression ")" ;
+
+// PostfixExpression
+PostExpPriExp.      PostfixExpression ::= PrimaryExpression ;
+PostExpBracketInt.  PostfixExpression ::= PostfixExpression "[" IntegerExpression "]" ;
+PostExpFuncCall.    PostfixExpression ::= FunctionCall ;
+PostExpDotFieldSel. PostfixExpression ::= PostfixExpression "." FIELD_SELECTION ; // TODO WTF Is FIELD_SELECTION FIELD_SELECTION Includes Members In Structures, Component Selection For Vectors And The 'length' Identifier For The Length() Method
+PostExpIncOp.       PostfixExpression ::= PostfixExpression "++" ;
+PostExpDecOp.       PostfixExpression ::= PostfixExpression "--" ;
+
+// IntegerExpression
+IntExp.             IntegerExpression ::= Expression ;
+
+// FunctionCall
+FuncCall.           FunctionCall ::= FunctionCallOrMethod ;
+
+// FunctionCallOrMethod
+FuncCallOrMethGen.  FunctionCallOrMethod ::= FunctionCallGeneric ;
+
+// FunctionCallGeneric
+FuncCallGenWithPara.    FunctionCallGeneric ::= FunctionCallHeaderWithParameters ")" ;
+FuncCallGenNoPara.      FunctionCallGeneric ::= FunctionCallHeaderNoParameters ")" ;
+
+// FunctionCallHeaderNoParameters
+FuncCallHeadNoParamVoid.    FunctionCallHeaderNoParameters ::= FunctionCallHeader "void" ;
+FuncCallHeadNoParam.        FunctionCallHeaderNoParameters ::= FunctionCallHeader ;
+
+// FunctionCallHeaderWithParameters
+FuncCallHeadWithParamAssExp.    FunctionCallHeaderWithParameters ::= FunctionCallHeader AssignmentExpression ;
+FuncCallHeadWithParamComma.     FunctionCallHeaderWithParameters ::= FunctionCallHeaderWithParameters "," AssignmentExpression ;
+
+// FunctionCallHeader
+FuncCallHeadIdent.  FunctionCallHeader ::= FunctionIdentifier "(" ;
+
+// FunctionIdentifier
+FuncIdentTypeSpec.  FunctionIdentifier ::= TypeSpecifier ;
+FuncIdentPostExp.   FunctionIdentifier ::= PostfixExpression ;
+
+// UnaryExpression
+UnaryExpPostExp.    UnaryExpression ::= PostfixExpression ;
+UnaryExpIncOp.      UnaryExpression ::= "++" UnaryExpression ;
+UnaryExpDecOp.      UnaryExpression ::= "--" UnaryExpression ;
+UnaryExpUnaryOp.    UnaryExpression ::= UnaryOperator UnaryExpression ;
+
+// UnaryOperator
+UnaryOpPlus.    UnaryOperator ::= "+" ;
+UnaryOpDash.    UnaryOperator ::= "-" ;
+UnaryOpBang.    UnaryOperator ::= "!" ;
+UnaryOpTilde.   UnaryOperator ::= "~" ;
+
+// MultiplicativeExpression
+MulExpUnaryExp.        MultiplicativeExpression ::= UnaryExpression ;
+MulExpStarUnaryExp.    MultiplicativeExpression ::= MultiplicativeExpression "*" UnaryExpression ;
+MulExpSlashUnaryExp.   MultiplicativeExpression ::= MultiplicativeExpression "/" UnaryExpression ;
+MulExpPercentUnaryExp. MultiplicativeExpression ::= MultiplicativeExpression "%" UnaryExpression ;
+
+// AdditiveExpression
+AddExpMulExp.   AdditiveExpression ::= MultiplicativeExpression ;
+AddExpPlus.     AdditiveExpression ::= AdditiveExpression "+" MultiplicativeExpression ;
+AddExpMinus.    AdditiveExpression ::= AdditiveExpression "-" MultiplicativeExpression ;
+
+// ShiftExpression
+ShiftExpAddExp.     ShiftExpression ::= AdditiveExpression ;
+ShiftExpLeftOp.     ShiftExpression ::= ShiftExpression "<<" AdditiveExpression ;
+ShiftExpRightOp.    ShiftExpression ::= ShiftExpression ">>" AdditiveExpression ;
+
+// RelationalExpression
+RelExpShiftExp.     RelationalExpression ::= ShiftExpression ;
+RelExpLeftAngle.    RelationalExpression ::= RelationalExpression "<" ShiftExpression ;
+RelExpRightAngle.   RelationalExpression ::= RelationalExpression ">" ShiftExpression ;
+RelExpLEOp.         RelationalExpression ::= RelationalExpression "<=" ShiftExpression ;
+RelExpGEOp.         RelationalExpression ::= RelationalExpression ">=" ShiftExpression ;
+
+// EqualityExpression
+EqExpRelExp.        EqualityExpression ::= RelationalExpression ;
+EqExpEqOp.          EqualityExpression ::= EqualityExpression "==" RelationalExpression ;
+EqExpNEOp.          EqualityExpression ::= EqualityExpression "!=" RelationalExpression ;
+
+// AndExpression
+AndExpEqExp.        AndExpression ::= EqualityExpression ;
+AndExpAmp.          AndExpression ::= AndExpression "&" EqualityExpression ;
+
+// ExclusiveOrExpression
+ExOrExpAndExp.    ExclusiveOrExpression ::= AndExpression ;
+ExOrExpCaret.     ExclusiveOrExpression ::= ExclusiveOrExpression "^" AndExpression ;
+
+// InclusiveOrExpression
+IncOrExpExOrExp.        InclusiveOrExpression ::= ExclusiveOrExpression ;
+IncOrExpVerticalBar.    InclusiveOrExpression ::= InclusiveOrExpression "|" ExclusiveOrExpression ;
+
+// LogicalAndExpression
+LogAndExpIncOrExp.  LogicalAndExpression ::= InclusiveOrExpression ;
+LogAndExpAnd.       LogicalAndExpression ::= LogicalAndExpression "&&" InclusiveOrExpression ;
+
+// LogicalXorExpression
+LogXorExpLogAndExp.     LogicalXorExpression ::= LogicalAndExpression ;
+LogXorExpXor.           LogicalXorExpression ::= LogicalXorExpression "^^" LogicalAndExpression ;
+
+// LogicalOrExpression
+LogOrExpLogXorExp.  LogicalOrExpression ::= LogicalXorExpression ;
+LogOrExpOr.         LogicalOrExpression ::= LogicalOrExpression "||" LogicalXorExpression ;
+
+// ConditionalExpression
+CondExpLogOrExp.    ConditionalExpression ::= LogicalOrExpression ;
+CondExpCond.        ConditionalExpression ::= LogicalOrExpression "?" Expression ":" AssignmentExpression ;
+
+// AssignmentExpression
+AssExpCondExp.  AssignmentExpression ::= ConditionalExpression ;
+AssExpAssign.   AssignmentExpression ::= UnaryExpression AssignmentOperator AssignmentExpression ;
+
+// AssignmentOperator
+AssOpEq.        AssignmentOperator ::= "=" ;
+AssOpMul.       AssignmentOperator ::= "*=" ;
+AssOpDiv.       AssignmentOperator ::= "/=" ;
+AssOpMod.       AssignmentOperator ::= "%=" ;
+AssOpAdd.       AssignmentOperator ::= "+=" ;
+AssOpSub.       AssignmentOperator ::= "-=" ;
+AssOpLeft.      AssignmentOperator ::= "<<=" ;
+AssOpRight.     AssignmentOperator ::= ">>=" ;
+AssOpAnd.       AssignmentOperator ::= "&=" ;
+AssOpXor.       AssignmentOperator ::= "^=" ;
+AssOpOr.        AssignmentOperator ::= "|=" ;
+
+// Expression
+ExpAssExp.  Expression ::= AssignmentExpression ;
+ExpComma.   Expression ::= Expression "," AssignmentExpression ;
+
+// ConstantExpression
+ConstExpCondExp.    ConstantExpression ::= ConditionalExpression ;
+
+// Declaration
+DeclFuncProto.          Declaration ::= FunctionPrototype ";" ;
+DeclInitDeclList.       Declaration ::= InitDeclaratorList ";" ;
+DeclPrecision.          Declaration ::= "precision" PrecisionQualifier TypeSpecifier ";" ;
+DeclStruct.             Declaration ::= TypeQualifier Id "{" StructDeclarationList "}" ";" ;
+DeclStructId.           Declaration ::= TypeQualifier Id "{" StructDeclarationList "}" Id ;
+DeclSemicolon.          Declaration ::= ";" ;
+// Decl.                Declaration ::= TypeQualifier Id "{" StructDeclarationList "}" Id ; TODO duplicate??? remove?
+DeclArrSpec.            Declaration ::= ArraySpecifier ";" ;
+DeclTypeSemicolon.      Declaration ::= TypeQualifier ";" ;
+DeclTypeId.             Declaration ::= TypeQualifier Id ";" ;
+DeclTypeIdList.         Declaration ::= TypeQualifier Id IdentifierList ";" ;
+
+// IdentifierList
+IdentListId.    IdentifierList ::= "," Id ;
+IdentListList.  IdentifierList ::= IdentifierList "," Id ;
+
+// FunctionPrototype
+FuncProto.      FunctionPrototype ::= FunctionDeclarator ")" ;
+
+// FunctionDeclarator
+FuncDeclNoParams.   FunctionDeclarator ::= FunctionHeader ;
+FuncDeclWithParams. FunctionDeclarator ::= FunctionHeaderWithParameters ;
+
+// FunctionHeaderWithParameters
+FuncHeadWithParams.       FunctionHeaderWithParameters ::= FunctionHeader ParameterDeclaration ;
+FuncHeadWithParamsComma.  FunctionHeaderWithParameters ::= FunctionHeaderWithParameters "," ParameterDeclaration ;
+
+// FunctionHeader
+FuncHead.   FunctionHeader ::= FullySpecifiedType Id "(" ;
+
+// ParameterDeclarator
+ParamDeclaratorId.        ParameterDeclarator ::= TypeSpecifier Id ;
+ParamDeclaratorArray.     ParameterDeclarator ::= TypeSpecifier Id ArraySpecifier ;
+
+// ParameterDeclaration
+ParamDeclTypeDeclarator.        ParameterDeclaration ::= TypeQualifier ParameterDeclarator ;
+ParamDeclDeclarator.            ParameterDeclaration ::= ParameterDeclarator ;
+ParamDeclTypeParamTypeSpec.     ParameterDeclaration ::= TypeQualifier ParameterTypeSpecifier ;
+ParamDeclParamTypeSpec.         ParameterDeclaration ::= ParameterTypeSpecifier ;
+
+// ParameterTypeSpecifier
+ParamTypeSpec.      ParameterTypeSpecifier ::= TypeSpecifier ;
+
+// InitDeclaratorList
+InitDeclListSingle.     InitDeclaratorList ::= SingleDeclaration ;
+InitDeclListId.         InitDeclaratorList ::= InitDeclaratorList "," Id ;
+InitDeclListIdArray.    InitDeclaratorList ::= InitDeclaratorList "," Id ArraySpecifier ;
+InitDeclListArrayInit.  InitDeclaratorList ::= InitDeclaratorList "," Id ArraySpecifier "=" Initializer ;
+InitDeclListInit.       InitDeclaratorList ::= InitDeclaratorList "," Id "=" Initializer ;
+
+// SingleDeclaration
+SingDeclFull.               SingleDeclaration ::= FullySpecifiedType ;
+SingDeclFullId.             SingleDeclaration ::= FullySpecifiedType Id ;
+SingDeclFullIdArray.        SingleDeclaration ::= FullySpecifiedType Id ArraySpecifier ;
+SingDeclFullIdArrayInit.    SingleDeclaration ::= FullySpecifiedType Id ArraySpecifier "=" Initializer ;
+SingDeclFullIdInit.         SingleDeclaration ::= FullySpecifiedType Id "=" Initializer ;
+
+// FullySpecifiedType
+FullSpecType.           FullySpecifiedType ::= TypeSpecifier ;
+FullSpecTypeType.       FullySpecifiedType ::= TypeQualifier TypeSpecifier ;
+
+// InvariantQualifier
+InvarQualifier.         InvariantQualifier ::= "invariant" ;
+
+// InterpolationQualifier
+InterpolQualifierSmooth.            InterpolationQualifier ::= "smooth" ;
+InterpolQualifierFlat.              InterpolationQualifier ::= "flat" ;
+InterpolQualifierNoPerspective.     InterpolationQualifier ::= "noperspective" ;
+
+// LayoutQualifier
+LayoutQualifier.                    LayoutQualifier ::= "layout" "(" LayoutQualifierIdList ")" ;
+
+// LayoutQualifierIdList
+LayoutQualifierIdListId.            LayoutQualifierIdList ::= LayoutQualifierId ;
+LayoutQualifierIdListComma.         LayoutQualifierIdList ::= LayoutQualifierIdList "," LayoutQualifierId ;
+
+// LayoutQualifierId
+LayoutQualifierId.          LayoutQualifierId ::= Id ;
+LayoutQualifierIdAssign.    LayoutQualifierId ::= Id "=" ConstantExpression ;
+LayoutQualifierIdShared.    LayoutQualifierId ::= "shared" ;
+
+// PreciseQualifier
+PreciseQualifierPrecise.    PreciseQualifier ::= "precise" ;
+
+// TypeQualifier
+TypeQualifierSingle.        TypeQualifier ::= SingleTypeQualifier ;
+TypeQualifierTypeSingle.    TypeQualifier ::= TypeQualifier SingleTypeQualifier ;
+
+// SingleTypeQualifier
+SingleTypeQualifierStorage.    SingleTypeQualifier ::= StorageQualifier ;
+SingleTypeQualifierLayout.     SingleTypeQualifier ::= LayoutQualifier ;
+SingleTypeQualifierPrecision.  SingleTypeQualifier ::= PrecisionQualifier ;
+SingleTypeQualifierInterpol.   SingleTypeQualifier ::= InterpolationQualifier ;
+SingleTypeQualifierInvariant.  SingleTypeQualifier ::= InvariantQualifier ;
+SingleTypeQualifierPrecise.    SingleTypeQualifier ::= PreciseQualifier ;
+
+// StorageQualifier
+StorageQualifier ::= "const" ;
+StorageQualifier ::= "in" ;
+StorageQualifier ::= "out" ;
+StorageQualifier ::= "inout" ;
+StorageQualifier ::= "centroid" ;
+StorageQualifier ::= "patch" ;
+StorageQualifier ::= "sample" ;
+StorageQualifier ::= "uniform" ;
+StorageQualifier ::= "buffer" ;
+StorageQualifier ::= "shared" ;
+StorageQualifier ::= "coherent" ;
+StorageQualifier ::= "volatile" ;
+StorageQualifier ::= "restrict" ;
+StorageQualifier ::= "readonly" ;
+StorageQualifier ::= "writeonly" ;
+StorageQualifier ::= "subroutine" ;
+StorageQualifier ::= "subroutine" "(" TypeNameList ")" ;
+
+// TypeNameList
+TypeNameListName.   TypeNameList ::= TYPE_NAME ;                    // TODO: Wtf is type name?
+TypeNameListList.   TypeNameList ::= TypeNameList "," TYPE_NAME ;   // TODO: TYPE_NAME???
+
+// TypeSpecifier
+TypeSpecNon.        TypeSpecifier ::= TypeSpecifierNonarray ;
+TypeSpecArraySpec.  TypeSpecifier ::= TypeSpecifierNonarray ArraySpecifier ;
+
+// ArraySpecifier
+ArrSpecBrackets.        ArraySpecifier ::= "[" "]" ;
+ArrSpecCondExp.         ArraySpecifier ::= "[" ConditionalExpression "]" ;
+ArrSpecArraySpec.       ArraySpecifier ::= ArraySpecifier "[" "]" ;
+ArrSpecArrayCondExp.    ArraySpecifier ::= ArraySpecifier "[" ConditionalExpression "]" ;
+
+// TypeSpecifierNonarray
+TypeSpecNonArrayVoid.   TypeSpecifierNonarray ::= "void" ;
+TypeSpecNonArrayFloat.   TypeSpecifierNonarray ::= "float" ;
+TypeSpecNonArrayDouble.   TypeSpecifierNonarray ::= "double" ;
+TypeSpecNonArrayInt.   TypeSpecifierNonarray ::= "int" ;
+TypeSpecNonArrayUint.   TypeSpecifierNonarray ::= "uint" ;
+TypeSpecNonArrayBool.   TypeSpecifierNonarray ::= "bool" ;
+TypeSpecNonArrayVec2.   TypeSpecifierNonarray ::= "vec2" ;
+TypeSpecNonArrayVec3.   TypeSpecifierNonarray ::= "vec3" ;
+TypeSpecNonArrayVec4.   TypeSpecifierNonarray ::= "vec4" ;
+TypeSpecNonArrayDvec2.   TypeSpecifierNonarray ::= "dvec2" ;
+TypeSpecNonArrayDvec3.   TypeSpecifierNonarray ::= "dvec3" ;
+TypeSpecNonArrayDvec4.   TypeSpecifierNonarray ::= "dvec4" ;
+TypeSpecNonArrayBvec2.   TypeSpecifierNonarray ::= "bvec2" ;
+TypeSpecNonArrayBvec3.   TypeSpecifierNonarray ::= "bvec3" ;
+TypeSpecNonArrayBvec4.   TypeSpecifierNonarray ::= "bvec4" ;
+TypeSpecNonArrayIvec2.   TypeSpecifierNonarray ::= "ivec2" ;
+TypeSpecNonArrayIvec3.   TypeSpecifierNonarray ::= "ivec3" ;
+TypeSpecNonArrayIvec4.   TypeSpecifierNonarray ::= "ivec4" ;
+TypeSpecNonArrayUvec2.   TypeSpecifierNonarray ::= "uvec2" ;
+TypeSpecNonArrayUvec3.   TypeSpecifierNonarray ::= "uvec3" ;
+TypeSpecNonArrayUvec4.   TypeSpecifierNonarray ::= "uvec4" ;
+TypeSpecNonArrayMat2.   TypeSpecifierNonarray ::= "mat2" ;
+TypeSpecNonArrayMat3.   TypeSpecifierNonarray ::= "mat3" ;
+TypeSpecNonArrayMat4.   TypeSpecifierNonarray ::= "mat4" ;
+TypeSpecNonArrayMat2x2.   TypeSpecifierNonarray ::= "mat2x2" ;
+TypeSpecNonArrayMat2x3.   TypeSpecifierNonarray ::= "mat2x3" ;
+TypeSpecNonArrayMat2x4.   TypeSpecifierNonarray ::= "mat2x4" ;
+TypeSpecNonArrayMat3x2.   TypeSpecifierNonarray ::= "mat3x2" ;
+TypeSpecNonArrayMat3x3.   TypeSpecifierNonarray ::= "mat3x3" ;
+TypeSpecNonArrayMat3x4.   TypeSpecifierNonarray ::= "mat3x4" ;
+TypeSpecNonArrayMat4x2.   TypeSpecifierNonarray ::= "mat4x2" ;
+TypeSpecNonArrayMat4x3.   TypeSpecifierNonarray ::= "mat4x3" ;
+TypeSpecNonArrayMat4x4.   TypeSpecifierNonarray ::= "mat4x4" ;
+TypeSpecNonArrayDmat2.   TypeSpecifierNonarray ::= "dmat2" ;
+TypeSpecNonArrayDmat3.   TypeSpecifierNonarray ::= "dmat3" ;
+TypeSpecNonArrayDmat4.   TypeSpecifierNonarray ::= "dmat4" ;
+TypeSpecNonArrayDmat2x2.   TypeSpecifierNonarray ::= "dmat2x2" ;
+TypeSpecNonArrayDmat2x3.   TypeSpecifierNonarray ::= "dmat2x3" ;
+TypeSpecNonArrayDmat2x4.   TypeSpecifierNonarray ::= "dmat2x4" ;
+TypeSpecNonArrayDmat3x2.   TypeSpecifierNonarray ::= "dmat3x2" ;
+TypeSpecNonArrayDmat3x3.   TypeSpecifierNonarray ::= "dmat3x3" ;
+TypeSpecNonArrayDmat3x4.   TypeSpecifierNonarray ::= "dmat3x4" ;
+TypeSpecNonArrayDmat4x2.   TypeSpecifierNonarray ::= "dmat4x2" ;
+TypeSpecNonArrayDmat4x3.   TypeSpecifierNonarray ::= "dmat4x3" ;
+TypeSpecNonArrayDmat4x4.   TypeSpecifierNonarray ::= "dmat4x4" ;
+TypeSpecNonArrayAtomic_uint.   TypeSpecifierNonarray ::= "atomic_uint" ;
+TypeSpecNonArraySampler2d.   TypeSpecifierNonarray ::= "sampler2d" ;
+TypeSpecNonArraySampler3d.   TypeSpecifierNonarray ::= "sampler3d" ;
+TypeSpecNonArraySamplercube.   TypeSpecifierNonarray ::= "samplercube" ;
+TypeSpecNonArraySampler2dshadow.   TypeSpecifierNonarray ::= "sampler2dshadow" ;
+TypeSpecNonArraySamplercubeshadow.   TypeSpecifierNonarray ::= "samplercubeshadow" ;
+TypeSpecNonArraySampler2darray.   TypeSpecifierNonarray ::= "sampler2darray" ;
+TypeSpecNonArraySampler2darrayshadow.   TypeSpecifierNonarray ::= "sampler2darrayshadow" ;
+TypeSpecNonArraySamplercubearray.   TypeSpecifierNonarray ::= "samplercubearray" ;
+TypeSpecNonArraySamplercubearrayshadow.   TypeSpecifierNonarray ::= "samplercubearrayshadow" ;
+TypeSpecNonArrayIsampler2d.   TypeSpecifierNonarray ::= "isampler2d" ;
+TypeSpecNonArrayIsampler3d.   TypeSpecifierNonarray ::= "isampler3d" ;
+TypeSpecNonArrayIsamplercube.   TypeSpecifierNonarray ::= "isamplercube" ;
+TypeSpecNonArrayIsampler2darray.   TypeSpecifierNonarray ::= "isampler2darray" ;
+TypeSpecNonArrayIsamplercubearray.   TypeSpecifierNonarray ::= "isamplercubearray" ;
+TypeSpecNonArrayUsampler2d.   TypeSpecifierNonarray ::= "usampler2d" ;
+TypeSpecNonArrayUsampler3d.   TypeSpecifierNonarray ::= "usampler3d" ;
+TypeSpecNonArrayUsamplercube.   TypeSpecifierNonarray ::= "usamplercube" ;
+TypeSpecNonArrayUsampler2darray.   TypeSpecifierNonarray ::= "usampler2darray" ;
+TypeSpecNonArrayUsamplercubearray.   TypeSpecifierNonarray ::= "usamplercubearray" ;
+TypeSpecNonArraySampler1d.   TypeSpecifierNonarray ::= "sampler1d" ;
+TypeSpecNonArraySampler1dshadow.   TypeSpecifierNonarray ::= "sampler1dshadow" ;
+TypeSpecNonArraySampler1darray.   TypeSpecifierNonarray ::= "sampler1darray" ;
+TypeSpecNonArraySampler1darrayshadow.   TypeSpecifierNonarray ::= "sampler1darrayshadow" ;
+TypeSpecNonArrayIsampler1d.   TypeSpecifierNonarray ::= "isampler1d" ;
+TypeSpecNonArrayIsampler1darray.   TypeSpecifierNonarray ::= "isampler1darray" ;
+TypeSpecNonArrayUsampler1d.   TypeSpecifierNonarray ::= "usampler1d" ;
+TypeSpecNonArrayUsampler1darray.   TypeSpecifierNonarray ::= "usampler1darray" ;
+TypeSpecNonArraySampler2drect.   TypeSpecifierNonarray ::= "sampler2drect" ;
+TypeSpecNonArraySampler2drectshadow.   TypeSpecifierNonarray ::= "sampler2drectshadow" ;
+TypeSpecNonArrayIsampler2drect.   TypeSpecifierNonarray ::= "isampler2drect" ;
+TypeSpecNonArrayUsampler2drect.   TypeSpecifierNonarray ::= "usampler2drect" ;
+TypeSpecNonArraySamplerbuffer.   TypeSpecifierNonarray ::= "samplerbuffer" ;
+TypeSpecNonArrayIsamplerbuffer.   TypeSpecifierNonarray ::= "isamplerbuffer" ;
+TypeSpecNonArrayUsamplerbuffer.   TypeSpecifierNonarray ::= "usamplerbuffer" ;
+TypeSpecNonArraySampler2dms.   TypeSpecifierNonarray ::= "sampler2dms" ;
+TypeSpecNonArrayIsampler2dms.   TypeSpecifierNonarray ::= "isampler2dms" ;
+TypeSpecNonArrayUsampler2dms.   TypeSpecifierNonarray ::= "usampler2dms" ;
+TypeSpecNonArraySampler2dmsarray.   TypeSpecifierNonarray ::= "sampler2dmsarray" ;
+TypeSpecNonArrayIsampler2dmsarray.   TypeSpecifierNonarray ::= "isampler2dmsarray" ;
+TypeSpecNonArrayUsampler2dmsarray.   TypeSpecifierNonarray ::= "usampler2dmsarray" ;
+TypeSpecNonArrayImage2d.   TypeSpecifierNonarray ::= "image2d" ;
+TypeSpecNonArrayIimage2d.   TypeSpecifierNonarray ::= "iimage2d" ;
+TypeSpecNonArrayUimage2d.   TypeSpecifierNonarray ::= "uimage2d" ;
+TypeSpecNonArrayImage3d.   TypeSpecifierNonarray ::= "image3d" ;
+TypeSpecNonArrayIimage3d.   TypeSpecifierNonarray ::= "iimage3d" ;
+TypeSpecNonArrayUimage3d.   TypeSpecifierNonarray ::= "uimage3d" ;
+TypeSpecNonArrayImagecube.   TypeSpecifierNonarray ::= "imagecube" ;
+TypeSpecNonArrayIimagecube.   TypeSpecifierNonarray ::= "iimagecube" ;
+TypeSpecNonArrayUimagecube.   TypeSpecifierNonarray ::= "uimagecube" ;
+TypeSpecNonArrayImagebuffer.   TypeSpecifierNonarray ::= "imagebuffer" ;
+TypeSpecNonArrayIimagebuffer.   TypeSpecifierNonarray ::= "iimagebuffer" ;
+TypeSpecNonArrayUimagebuffer.   TypeSpecifierNonarray ::= "uimagebuffer" ;
+TypeSpecNonArrayImage1d.   TypeSpecifierNonarray ::= "image1d" ;
+TypeSpecNonArrayIimage1d.   TypeSpecifierNonarray ::= "iimage1d" ;
+TypeSpecNonArrayUimage1d.   TypeSpecifierNonarray ::= "uimage1d" ;
+TypeSpecNonArrayImage1darray.   TypeSpecifierNonarray ::= "image1darray" ;
+TypeSpecNonArrayIimage1darray.   TypeSpecifierNonarray ::= "iimage1darray" ;
+TypeSpecNonArrayUimage1darray.   TypeSpecifierNonarray ::= "uimage1darray" ;
+TypeSpecNonArrayImage2drect.   TypeSpecifierNonarray ::= "image2drect" ;
+TypeSpecNonArrayIimage2drect.   TypeSpecifierNonarray ::= "iimage2drect" ;
+TypeSpecNonArrayUimage2drect.   TypeSpecifierNonarray ::= "uimage2drect" ;
+TypeSpecNonArrayImage2darray.   TypeSpecifierNonarray ::= "image2darray" ;
+TypeSpecNonArrayIimage2darray.   TypeSpecifierNonarray ::= "iimage2darray" ;
+TypeSpecNonArrayUimage2darray.   TypeSpecifierNonarray ::= "uimage2darray" ;
+TypeSpecNonArrayImagecubearray.   TypeSpecifierNonarray ::= "imagecubearray" ;
+TypeSpecNonArrayIimagecubearray.   TypeSpecifierNonarray ::= "iimagecubearray" ;
+TypeSpecNonArrayUimagecubearray.   TypeSpecifierNonarray ::= "uimagecubearray" ;
+TypeSpecNonArrayImage2dms.   TypeSpecifierNonarray ::= "image2dms" ;
+TypeSpecNonArrayIimage2dms.   TypeSpecifierNonarray ::= "iimage2dms" ;
+TypeSpecNonArrayUimage2dms.   TypeSpecifierNonarray ::= "uimage2dms" ;
+TypeSpecNonArrayImage2dmsarray.   TypeSpecifierNonarray ::= "image2dmsarray" ;
+TypeSpecNonArrayIimage2dmsarray.   TypeSpecifierNonarray ::= "iimage2dmsarray" ;
+TypeSpecNonArrayUimage2dmsarray.   TypeSpecifierNonarray ::= "uimage2dmsarray" ;
+TypeSpecNonArrayStructspecifier.   TypeSpecifierNonarray ::= "structspecifier" ;
+TypeSpecNonArrayTypeName.   TypeSpecifierNonarray ::= TYPE_NAME ; // TODO WTF is TYPE_NAME
+
+// PrecisionQualifier
+PrecisionQualifierHigh.     PrecisionQualifier ::= "highp" ;
+PrecisionQualifierMedium.   PrecisionQualifier ::= "mediump" ;
+PrecisionQualifierLow.      PrecisionQualifier ::= "lowp" ;
+
+// StructSpecifier
+StructSpecId.       StructSpecifier ::= "struct" Id "{" StructDeclarationList "}" ;
+StructSpecNoId.     StructSpecifier ::= "struct" "{" StructDeclarationList "}" ;
+
+// StructDeclarationList
+StructDeclList.     StructDeclarationList ::= StructDeclaration ;
+StructDeclList.     StructDeclarationList ::= StructDeclarationList StructDeclaration ;
+
+// StructDeclaration
+StructDeclTypeSpec.         StructDeclaration ::= TypeSpecifier StructDeclaratorList ";" ;
+StructDeclTypeQualifier.    StructDeclaration ::= TypeQualifier TypeSpecifier StructDeclaratorList ";" ;
+
+// StructDeclaratorList
+StructDeclListDeclarator.    StructDeclaratorList ::= StructDeclarator ;
+StructDeclListComma.         StructDeclaratorList ::= StructDeclaratorList "," StructDeclarator ;
+
+// StructDeclarator
+StructDeclId.           StructDeclarator ::= Id ;
+StructDeclIdArray.      StructDeclarator ::= Id ArraySpecifier ;
+
+// Initializer
+InitAssExp.         Initializer ::= AssignmentExpression ;
+InitInitList.       Initializer ::= "{" InitializerList "}" ;
+InitInitListComma.  Initializer ::= "{" InitializerList "," "}" ;
+
+// InitializerList
+InitListInit.       InitializerList ::= Initializer ;
+InitListComma.      InitializerList ::= InitializerList "," Initializer ;
+
+// DeclarationStatement
+DeclStatement.      DeclarationStatement ::= Declaration ;
+
+// Statement
+StatementCompound.  Statement ::= CompoundStatement ;
+StatementSimple.    Statement ::= SimpleStatement ;
+
+// SimpleStatement
+SimpleStatementDeclStatement.       SimpleStatement ::= DeclarationStatement ;
+SimpleStatementExpStatement.        SimpleStatement ::= ExpressionStatement ;
+SimpleStatementSelStatement.        SimpleStatement ::= SelectionStatement ;
+SimpleStatementSwitchStatement.     SimpleStatement ::= SwitchStatement ;
+SimpleStatementCaseStatement.       SimpleStatement ::= CaseLabel ;
+SimpleStatementIterStatement.       SimpleStatement ::= IterationStatement ;
+SimpleStatementJumpStatement.       SimpleStatement ::= JumpStatement ;
+
+// CompoundStatement
+CompStatementBraces.      CompoundStatement ::= "{" "}" ;
+CompStatementList.          CompoundStatement ::= "{" StatementList "}" ;
+
+// StatementNoNewScope
+StatementNoNewScope.        StatementNoNewScope ::= CompoundStatementNoNewScope ;
+StatementNoNewScope.        StatementNoNewScope ::= SimpleStatement ;
+
+// CompoundStatementNoNewScope
+CompStateNoNewScopeBraces.  CompoundStatementNoNewScope ::= "{" "}" ;
+CompStateNoNewScopeList.    CompoundStatementNoNewScope ::= "{" StatementList "}" ;
+
+// StatementList
+StatementListStatement.         StatementList ::= Statement ;
+StatementListStatementList.     StatementList ::= StatementList Statement ;
+
+// ExpressionStatement
+ExpStatementSemicolon.      ExpressionStatement ::= ";" ;
+ExpStatementExp.            ExpressionStatement ::= Expression ";" ;
+
+// SelectionStatement
+SelStatementIf.             SelectionStatement ::= "if" "(" Expression ")" SelectionRestStatement ;
+
+// SelectionRestStatement
+SelRestStatementElse.           SelectionRestStatement ::= Statement "else" Statement ;
+SelRestStatementStatement.      SelectionRestStatement ::= Statement ;
+
+// Condition
+CondExp.            Condition ::= Expression ;
+CondFullIdInit.     Condition ::= FullySpecifiedType Id "=" Initializer ;
+
+// SwitchStatement
+SwitchStatementSwitch.      SwitchStatement ::= "switch" "(" Expression ")" "{" SwitchStatementList ;
+SwitchStatementRightBrace.  SwitchStatement ::= "}" ;
+
+// SwitchStatementList
+SwitchStatementListEmpty.   SwitchStatementList ::= eps ;
+SwitchStatementListList.    SwitchStatementList ::= StatementList ;
+
+// CaseLabel
+CaseLabelExp.       CaseLabel ::= "case" Expression ":" ;
+CaseLabelDefault.   CaseLabel ::= "default" ":" ;
+
+// IterationStatement
+IterStatementWhile.     IterationStatement ::= "while" "(" Condition ")" StatementNoNewScope ;
+IterStatementDo.        IterationStatement ::= "do" Statement "while" "(" Expression ")" ";" ;
+IterStatementFor.       IterationStatement ::= "for" "(" ForInitStatement ForRestStatement ")" StatementNoNewScope ;
+
+// ForInitStatement
+ForInitStatementExp.    ForInitStatement ::= ExpressionStatement ;
+ForInitStatementDecl.   ForInitStatement ::= DeclarationStatement ;
+
+// Conditionopt
+CondoptCond.    Conditionopt ::= Condition ;
+CondoptEmpty.   Conditionopt ::= eps ;
+
+// ForRestStatement
+ForRestStatementCondopt.        ForRestStatement ::= Conditionopt ";" ;
+ForRestStatementCondoptExp.     ForRestStatement ::= Conditionopt ";" Expression ;
+
+// JumpStatement
+JumpStatementContinue.      JumpStatement ::= "continue" ";" ;
+JumpStatementBreak.         JumpStatement ::= "break" ";" ;
+JumpStatementReturn.        JumpStatement ::= "return" ";" ;
+JumpStatementReturnExp.     JumpStatement ::= "return" Expression ";" ;
+JumpStatementDiscard.       JumpStatement ::= "discard" ";" ; // Fragment Shader Only. TODO: Maybe ignore?
+
+// TranslationUnit
+TransUnitExtern.        TranslationUnit ::= ExternalDeclaration ;
+TransUnitTransExtern.   TranslationUnit ::= TranslationUnit ExternalDeclaration ;
+
+// ExternalDeclaration
+ExternDeclFuncDef.      ExternalDeclaration ::= FunctionDefinition ;
+ExternDeclDecl.         ExternalDeclaration ::= Declaration ;
+ExternDeclSemicolon.    ExternalDeclaration ::= ";" ;
+
+// FunctionDefinition
+FuncDef.    FunctionDefinition ::= FunctionPrototype CompoundStatementNoNewScope ;

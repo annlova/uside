@@ -4,22 +4,22 @@
 
 #include "label_id.h"
 
-void absyn::bnf::LabelIdBracketsColonSquare::accept(LabelIdVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelIdBracketsColonSquare::accept(LabelIdVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::LabelIdIdent::accept(LabelIdVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelIdIdent::accept(LabelIdVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::LabelIdBracketsColon::accept(LabelIdVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelIdBracketsColon::accept(LabelIdVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::LabelIdSquareBrackets::accept(LabelIdVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelIdSquareBrackets::accept(LabelIdVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::LabelIdUnderscore::accept(LabelIdVisitor* v) {
-    v->visit(this);
+void absyn::bnf::LabelIdUnderscore::accept(LabelIdVisitor& v) const {
+    v.visit(*this);
 }

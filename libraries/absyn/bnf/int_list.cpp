@@ -4,6 +4,6 @@
 
 #include "int_list.h"
 
-void absyn::bnf::IntListListInteger::accept(IntListVisitor* v) {
-    v->visit(this);
+void absyn::bnf::IntListListInteger::accept(IntListVisitor& v) const {
+    v.visit(*this);
 }

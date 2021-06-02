@@ -4,10 +4,10 @@
 
 #include "list_prof_item.h"
 
-void absyn::bnf::ListProfItemProfItem::accept(ListProfItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListProfItemProfItem::accept(ListProfItemVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ListProfItemList::accept(ListProfItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListProfItemList::accept(ListProfItemVisitor& v) const {
+    v.visit(*this);
 }

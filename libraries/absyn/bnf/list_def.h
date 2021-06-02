@@ -8,7 +8,6 @@
 #include "def.h"
 
 namespace absyn::bnf {
-    struct Env {};
     struct ListDef {
         ListDef() = default;
         virtual ~ListDef() = default;
@@ -18,12 +17,12 @@ namespace absyn::bnf {
         ListDef& operator=(ListDef& other) = delete;
         ListDef& operator=(ListDef&& other) = delete;
 
-        virtual void accept(struct ListDefVisitor& v, Env& env) const = 0;
+        virtual void accept(struct ListDefVisitor& v) const = 0;
     };
 
     class ListDefEpsilon : public ListDef {
 	public:
-        void accept(ListDefVisitor& v, Env& env) const override;
+        void accept(ListDefVisitor& v) const override;
     };
 
     class ListDefList : public ListDef {
@@ -36,21 +35,21 @@ namespace absyn::bnf {
 		ListDefList& operator=(ListDefList& other) = delete;
 		ListDefList& operator=(ListDefList&& other) = delete;
 
-        void accept(ListDefVisitor& v, Env& env) const override;
-        [[nodiscard]] const Def* v1() const { return mV1; }
-        [[nodiscard]] const ListDef* v2() const { return mV2; }
+        void accept(ListDefVisitor& v) const override;
+        [[nodiscard]] const Def& v1() const { return *mV1; }
+        [[nodiscard]] const ListDef& v2() const { return *mV2; }
     private:
         const Def* mV1;
         const ListDef* mV2;
     };
 
     struct ListDefVisitor {
-        virtual void visit(const ListDefEpsilon& token, Env& env) const = 0;
-        virtual void visit(const ListDefList& token, Env& env) const = 0;
+        virtual void visit(const ListDefEpsilon& token) = 0;
+        virtual void visit(const ListDefList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListDefAcceptFn)(void*, ListDefVisitor* v);
+    typedef void (ListDefAcceptFn)(void*, ListDefVisitor& v);
     struct ListDefVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

@@ -1,0 +1,3 @@
+void absyn::$3::$9::accept($4Visitor& v) const {
+    v.visit(*this);
+}

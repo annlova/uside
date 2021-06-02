@@ -4,10 +4,10 @@
 
 #include "minimum_size.h"
 
-void absyn::bnf::MinimumSizeEpsilon::accept(MinimumSizeVisitor* v) {
-    v->visit(this);
+void absyn::bnf::MinimumSizeEpsilon::accept(MinimumSizeVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::MinimumSizeNonempty::accept(MinimumSizeVisitor* v) {
-    v->visit(this);
+void absyn::bnf::MinimumSizeNonempty::accept(MinimumSizeVisitor& v) const {
+    v.visit(*this);
 }

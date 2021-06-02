@@ -15,7 +15,7 @@ namespace absyn::bnf {
         Cat& operator=(Cat& other) = delete;
         Cat& operator=(Cat&& other) = delete;
 
-        virtual void accept(struct CatVisitor* v) = 0;
+        virtual void accept(struct CatVisitor& v) const = 0;
     };
 
     class CatSquare : public Cat {
@@ -28,8 +28,8 @@ namespace absyn::bnf {
 		CatSquare& operator=(CatSquare& other) = delete;
 		CatSquare& operator=(CatSquare&& other) = delete;
 
-        void accept(CatVisitor* v) override;
-        [[nodiscard]] const Cat* v1() const { return mV1; }
+        void accept(CatVisitor& v) const override;
+        [[nodiscard]] const Cat& v1() const { return *mV1; }
     private:
         const Cat* mV1;
     };
@@ -44,19 +44,19 @@ namespace absyn::bnf {
 		CatIdent& operator=(CatIdent& other) = delete;
 		CatIdent& operator=(CatIdent&& other) = delete;
 
-        void accept(CatVisitor* v) override;
+        void accept(CatVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
     };
 
     struct CatVisitor {
-        virtual void visit(CatSquare* token) = 0;
-        virtual void visit(CatIdent* token) = 0;
+        virtual void visit(const CatSquare& token) = 0;
+        virtual void visit(const CatIdent& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (CatAcceptFn)(void*, CatVisitor* v);
+    typedef void (CatAcceptFn)(void*, CatVisitor& v);
     struct CatVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

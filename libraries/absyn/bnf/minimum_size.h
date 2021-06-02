@@ -15,26 +15,26 @@ namespace absyn::bnf {
         MinimumSize& operator=(MinimumSize& other) = delete;
         MinimumSize& operator=(MinimumSize&& other) = delete;
 
-        virtual void accept(struct MinimumSizeVisitor* v) = 0;
+        virtual void accept(struct MinimumSizeVisitor& v) const = 0;
     };
 
     class MinimumSizeNonempty : public MinimumSize {
 	public:
-        void accept(MinimumSizeVisitor* v) override;
+        void accept(MinimumSizeVisitor& v) const override;
     };
 
     class MinimumSizeEpsilon : public MinimumSize {
 	public:
-        void accept(MinimumSizeVisitor* v) override;
+        void accept(MinimumSizeVisitor& v) const override;
     };
 
     struct MinimumSizeVisitor {
-        virtual void visit(MinimumSizeNonempty* token) = 0;
-        virtual void visit(MinimumSizeEpsilon* token) = 0;
+        virtual void visit(const MinimumSizeNonempty& token) = 0;
+        virtual void visit(const MinimumSizeEpsilon& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (MinimumSizeAcceptFn)(void*, MinimumSizeVisitor* v);
+    typedef void (MinimumSizeAcceptFn)(void*, MinimumSizeVisitor& v);
     struct MinimumSizeVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

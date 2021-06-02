@@ -18,7 +18,7 @@ namespace absyn::bnf {
         ProfItem& operator=(ProfItem& other) = delete;
         ProfItem& operator=(ProfItem&& other) = delete;
 
-        virtual void accept(struct ProfItemVisitor* v) = 0;
+        virtual void accept(struct ProfItemVisitor& v) const = 0;
     };
 
     class ProfItemBrackets : public ProfItem {
@@ -31,20 +31,20 @@ namespace absyn::bnf {
 		ProfItemBrackets& operator=(ProfItemBrackets& other) = delete;
 		ProfItemBrackets& operator=(ProfItemBrackets&& other) = delete;
 
-        void accept(ProfItemVisitor* v) override;
-        [[nodiscard]] const ListIntList* v1() const { return mV1; }
-        [[nodiscard]] const ListInteger* v2() const { return mV2; }
+        void accept(ProfItemVisitor& v) const override;
+        [[nodiscard]] const ListIntList& v1() const { return *mV1; }
+        [[nodiscard]] const ListInteger& v2() const { return *mV2; }
     private:
         const ListIntList* mV1;
         const ListInteger* mV2;
     };
 
     struct ProfItemVisitor {
-        virtual void visit(ProfItemBrackets* token) = 0;
+        virtual void visit(const ProfItemBrackets& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ProfItemAcceptFn)(void*, ProfItemVisitor* v);
+    typedef void (ProfItemAcceptFn)(void*, ProfItemVisitor& v);
     struct ProfItemVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

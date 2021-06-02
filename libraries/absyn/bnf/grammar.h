@@ -8,7 +8,6 @@
 #include "list_def.h"
 
 namespace absyn::bnf {
-    template <class Return, class Argument>
     struct Grammar {
         Grammar() = default;
         virtual ~Grammar() = default;
@@ -18,11 +17,10 @@ namespace absyn::bnf {
         Grammar& operator=(Grammar& other) = delete;
         Grammar& operator=(Grammar&& other) = delete;
 
-        virtual Return accept(struct GrammarVisitor* v, Argument arg) = 0;
+        virtual void accept(struct GrammarVisitor& v) const = 0;
     };
 
-    template <class Return, class Argument>
-    class GrammarListDef : public Grammar<Return, Argument> {
+    class GrammarListDef : public Grammar {
 	public:
 		GrammarListDef() : mV1{nullptr} {}
 		~GrammarListDef() override { delete mV1; }
@@ -32,18 +30,18 @@ namespace absyn::bnf {
 		GrammarListDef& operator=(GrammarListDef& other) = delete;
 		GrammarListDef& operator=(GrammarListDef&& other) = delete;
 
-        Return accept(GrammarVisitor* v, Argument arg) override;
-        [[nodiscard]] const ListDef* v1() const { return mV1; }
+        void accept(GrammarVisitor& v) const override;
+        [[nodiscard]] const ListDef& v1() const { return *mV1; }
     private:
         const ListDef* mV1;
     };
 
     struct GrammarVisitor {
-        virtual void visit(const GrammarListDef* token, ) const = 0;
+        virtual void visit(const GrammarListDef& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (GrammarAcceptFn)(void*, GrammarVisitor* v);
+    typedef void (GrammarAcceptFn)(void*, GrammarVisitor& v);
     struct GrammarVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

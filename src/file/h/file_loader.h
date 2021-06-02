@@ -10,6 +10,7 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <filesystem>
 
 #include <logs/include/log_include.h>
 
@@ -56,6 +57,12 @@ namespace file {
             return std::vector<std::byte>();
         }
 
+        static bool createDirectories(const std::string& path) {
+            auto pathDirStringLength = path.find_last_of('/') + 1;
+            std::string pathDirString = path.substr(0, pathDirStringLength);
+            return std::filesystem::create_directories(pathDirString);
+        }
+
         static void writeText(const char* path, const char* data, WriteFlag flags) {
             std::ofstream outputFile(path, std::ios::out | static_cast<std::ios::openmode>(flags));
 
@@ -63,7 +70,18 @@ namespace file {
                 outputFile << data;
                 outputFile.close();
             } else {
-                LOG_ERR() << "Unable to open \"" << path << "\" for writing." << LOG_END;
+                auto created = createDirectories(path);
+                if (created) {
+                    std::ofstream outputFile2(path, std::ios::out | static_cast<std::ios::openmode>(flags));
+                    if(outputFile2.is_open()) {
+                        outputFile2 << data;
+                        outputFile2.close();
+                    } else {
+                        LOG_ERR() << "Unable to open \"" << path << "\" for writing." << LOG_END;
+                    }
+                } else {
+                    LOG_ERR() << "Unable to create directories for \"" << path << "\"." << LOG_END;
+                }
             }
         }
 
@@ -74,7 +92,18 @@ namespace file {
                 outputFile << data;
                 outputFile.close();
             } else {
-                LOG_ERR() << "Unable to open \"" << path << "\" for writing." << LOG_END;
+                auto created = createDirectories(path);
+                if (created) {
+                    std::ofstream outputFile2(path, std::ios::out | std::ios::binary | static_cast<std::ios::openmode>(flags));
+                    if(outputFile2.is_open()) {
+                        outputFile2 << data;
+                        outputFile2.close();
+                    } else {
+                        LOG_ERR() << "Unable to open \"" << path << "\" for writing." << LOG_END;
+                    }
+                } else {
+                    LOG_ERR() << "Unable to create directories for \"" << path << "\"." << LOG_END;
+                }
             }
         }
     };

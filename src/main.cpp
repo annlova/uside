@@ -37,6 +37,8 @@ struct B {
     A* a;
 };
 
+#include <filesystem>
+
 int main() {
     // Make ANSI colors work in clion console on some systems.
     (void) system(("chcp " + std::to_string(CP_UTF8) + ">nul").c_str());

@@ -15,7 +15,7 @@ namespace absyn::bnf {
         ListString& operator=(ListString& other) = delete;
         ListString& operator=(ListString&& other) = delete;
 
-        virtual void accept(struct ListStringVisitor* v) = 0;
+        virtual void accept(struct ListStringVisitor& v) const = 0;
     };
 
     class ListStringString : public ListString {
@@ -28,7 +28,7 @@ namespace absyn::bnf {
 		ListStringString& operator=(ListStringString& other) = delete;
 		ListStringString& operator=(ListStringString&& other) = delete;
 
-        void accept(ListStringVisitor* v) override;
+        void accept(ListStringVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -44,21 +44,21 @@ namespace absyn::bnf {
 		ListStringList& operator=(ListStringList& other) = delete;
 		ListStringList& operator=(ListStringList&& other) = delete;
 
-        void accept(ListStringVisitor* v) override;
+        void accept(ListStringVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
-        [[nodiscard]] const ListString* v2() const { return mV2; }
+        [[nodiscard]] const ListString& v2() const { return *mV2; }
     private:
         const char* mV1;
         const ListString* mV2;
     };
 
     struct ListStringVisitor {
-        virtual void visit(ListStringString* token) = 0;
-        virtual void visit(ListStringList* token) = 0;
+        virtual void visit(const ListStringString& token) = 0;
+        virtual void visit(const ListStringList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListStringAcceptFn)(void*, ListStringVisitor* v);
+    typedef void (ListStringAcceptFn)(void*, ListStringVisitor& v);
     struct ListStringVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

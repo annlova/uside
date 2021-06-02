@@ -17,7 +17,7 @@ namespace absyn::bnf {
         ListRHS& operator=(ListRHS& other) = delete;
         ListRHS& operator=(ListRHS&& other) = delete;
 
-        virtual void accept(struct ListRHSVisitor* v) = 0;
+        virtual void accept(struct ListRHSVisitor& v) const = 0;
     };
 
     class ListRHSRHS : public ListRHS {
@@ -30,8 +30,8 @@ namespace absyn::bnf {
 		ListRHSRHS& operator=(ListRHSRHS& other) = delete;
 		ListRHSRHS& operator=(ListRHSRHS&& other) = delete;
 
-        void accept(ListRHSVisitor* v) override;
-        [[nodiscard]] const RHS* v1() const { return mV1; }
+        void accept(ListRHSVisitor& v) const override;
+        [[nodiscard]] const RHS& v1() const { return *mV1; }
     private:
         const RHS* mV1;
     };
@@ -46,21 +46,21 @@ namespace absyn::bnf {
 		ListRHSList& operator=(ListRHSList& other) = delete;
 		ListRHSList& operator=(ListRHSList&& other) = delete;
 
-        void accept(ListRHSVisitor* v) override;
-        [[nodiscard]] const RHS* v1() const { return mV1; }
-        [[nodiscard]] const ListRHS* v2() const { return mV2; }
+        void accept(ListRHSVisitor& v) const override;
+        [[nodiscard]] const RHS& v1() const { return *mV1; }
+        [[nodiscard]] const ListRHS& v2() const { return *mV2; }
     private:
         const RHS* mV1;
         const ListRHS* mV2;
     };
 
     struct ListRHSVisitor {
-        virtual void visit(ListRHSRHS* token) = 0;
-        virtual void visit(ListRHSList* token) = 0;
+        virtual void visit(const ListRHSRHS& token) = 0;
+        virtual void visit(const ListRHSList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListRHSAcceptFn)(void*, ListRHSVisitor* v);
+    typedef void (ListRHSAcceptFn)(void*, ListRHSVisitor& v);
     struct ListRHSVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

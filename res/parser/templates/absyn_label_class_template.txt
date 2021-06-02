@@ -1,0 +1,15 @@
+    class $9 : public $4 {
+	public:
+		$9() : $17 {}
+		~$9() override { $18}
+		$9($9& $10) = delete;
+		$9($9&& $10) = delete;
+
+		$9& operator=($9& other) = delete;
+		$9& operator=($9&& other) = delete;
+
+        void accept($4Visitor& v) const override;
+        $11
+    private:
+        $12
+    };

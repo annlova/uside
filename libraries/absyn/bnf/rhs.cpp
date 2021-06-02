@@ -4,6 +4,6 @@
 
 #include "rhs.h"
 
-void absyn::bnf::RHSListItem::accept(RHSVisitor* v) {
-    v->visit(this);
+void absyn::bnf::RHSListItem::accept(RHSVisitor& v) const {
+    v.visit(*this);
 }

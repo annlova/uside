@@ -4,10 +4,10 @@
 
 #include "item.h"
 
-void absyn::bnf::ItemCat::accept(ItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ItemCat::accept(ItemVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ItemString::accept(ItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ItemString::accept(ItemVisitor& v) const {
+    v.visit(*this);
 }

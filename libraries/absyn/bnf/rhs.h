@@ -17,7 +17,7 @@ namespace absyn::bnf {
         RHS& operator=(RHS& other) = delete;
         RHS& operator=(RHS&& other) = delete;
 
-        virtual void accept(struct RHSVisitor* v) = 0;
+        virtual void accept(struct RHSVisitor& v) const = 0;
     };
 
     class RHSListItem : public RHS {
@@ -30,18 +30,18 @@ namespace absyn::bnf {
 		RHSListItem& operator=(RHSListItem& other) = delete;
 		RHSListItem& operator=(RHSListItem&& other) = delete;
 
-        void accept(RHSVisitor* v) override;
-        [[nodiscard]] const ListItem* v1() const { return mV1; }
+        void accept(RHSVisitor& v) const override;
+        [[nodiscard]] const ListItem& v1() const { return *mV1; }
     private:
         const ListItem* mV1;
     };
 
     struct RHSVisitor {
-        virtual void visit(RHSListItem* token) = 0;
+        virtual void visit(const RHSListItem& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (RHSAcceptFn)(void*, RHSVisitor* v);
+    typedef void (RHSAcceptFn)(void*, RHSVisitor& v);
     struct RHSVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

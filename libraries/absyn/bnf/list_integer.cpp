@@ -4,14 +4,14 @@
 
 #include "list_integer.h"
 
-void absyn::bnf::ListIntegerInteger::accept(ListIntegerVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListIntegerInteger::accept(ListIntegerVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ListIntegerIntegerList::accept(ListIntegerVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListIntegerIntegerList::accept(ListIntegerVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ListIntegerEmpty::accept(ListIntegerVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListIntegerEmpty::accept(ListIntegerVisitor& v) const {
+    v.visit(*this);
 }

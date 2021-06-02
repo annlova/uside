@@ -4,10 +4,10 @@
 
 #include "cat.h"
 
-void absyn::bnf::CatIdent::accept(CatVisitor* v) {
-    v->visit(this);
+void absyn::bnf::CatIdent::accept(CatVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::CatSquare::accept(CatVisitor* v) {
-    v->visit(this);
+void absyn::bnf::CatSquare::accept(CatVisitor& v) const {
+    v.visit(*this);
 }

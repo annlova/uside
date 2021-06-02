@@ -18,7 +18,7 @@ namespace absyn::bnf {
         Label& operator=(Label& other) = delete;
         Label& operator=(Label&& other) = delete;
 
-        virtual void accept(struct LabelVisitor* v) = 0;
+        virtual void accept(struct LabelVisitor& v) const = 0;
     };
 
     class LabelLabelId : public Label {
@@ -31,8 +31,8 @@ namespace absyn::bnf {
 		LabelLabelId& operator=(LabelLabelId& other) = delete;
 		LabelLabelId& operator=(LabelLabelId&& other) = delete;
 
-        void accept(LabelVisitor* v) override;
-        [[nodiscard]] const LabelId* v1() const { return mV1; }
+        void accept(LabelVisitor& v) const override;
+        [[nodiscard]] const LabelId& v1() const { return *mV1; }
     private:
         const LabelId* mV1;
     };
@@ -47,9 +47,9 @@ namespace absyn::bnf {
 		LabelLabelIdListProfItem& operator=(LabelLabelIdListProfItem& other) = delete;
 		LabelLabelIdListProfItem& operator=(LabelLabelIdListProfItem&& other) = delete;
 
-        void accept(LabelVisitor* v) override;
-        [[nodiscard]] const LabelId* v1() const { return mV1; }
-        [[nodiscard]] const ListProfItem* v2() const { return mV2; }
+        void accept(LabelVisitor& v) const override;
+        [[nodiscard]] const LabelId& v1() const { return *mV1; }
+        [[nodiscard]] const ListProfItem& v2() const { return *mV2; }
     private:
         const LabelId* mV1;
         const ListProfItem* mV2;
@@ -65,10 +65,10 @@ namespace absyn::bnf {
 		LabelDoubleLabelIdListProfItem& operator=(LabelDoubleLabelIdListProfItem& other) = delete;
 		LabelDoubleLabelIdListProfItem& operator=(LabelDoubleLabelIdListProfItem&& other) = delete;
 
-        void accept(LabelVisitor* v) override;
-        [[nodiscard]] const LabelId* v1() const { return mV1; }
-        [[nodiscard]] const LabelId* v2() const { return mV2; }
-        [[nodiscard]] const ListProfItem* v3() const { return mV3; }
+        void accept(LabelVisitor& v) const override;
+        [[nodiscard]] const LabelId& v1() const { return *mV1; }
+        [[nodiscard]] const LabelId& v2() const { return *mV2; }
+        [[nodiscard]] const ListProfItem& v3() const { return *mV3; }
     private:
         const LabelId* mV1;
         const LabelId* mV2;
@@ -76,13 +76,13 @@ namespace absyn::bnf {
     };
 
     struct LabelVisitor {
-        virtual void visit(LabelLabelId* token) = 0;
-        virtual void visit(LabelLabelIdListProfItem* token) = 0;
-        virtual void visit(LabelDoubleLabelIdListProfItem* token) = 0;
+        virtual void visit(const LabelLabelId& token) = 0;
+        virtual void visit(const LabelLabelIdListProfItem& token) = 0;
+        virtual void visit(const LabelDoubleLabelIdListProfItem& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (LabelAcceptFn)(void*, LabelVisitor* v);
+    typedef void (LabelAcceptFn)(void*, LabelVisitor& v);
     struct LabelVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

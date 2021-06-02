@@ -15,7 +15,7 @@ namespace absyn::bnf {
         Reg& operator=(Reg& other) = delete;
         Reg& operator=(Reg&& other) = delete;
 
-        virtual void accept(struct RegVisitor* v) = 0;
+        virtual void accept(struct RegVisitor& v) const = 0;
     };
 
     class RegReg : public Reg {
@@ -28,35 +28,35 @@ namespace absyn::bnf {
 		RegReg& operator=(RegReg& other) = delete;
 		RegReg& operator=(RegReg&& other) = delete;
 
-        void accept(RegVisitor* v) override;
-        [[nodiscard]] const Reg* v1() const { return mV1; }
+        void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
     private:
         const Reg* mV1;
     };
 
     class RegChar : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegLower : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegUpper : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegLetter : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegDigit : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegSquareString : public Reg {
@@ -69,7 +69,7 @@ namespace absyn::bnf {
 		RegSquareString& operator=(RegSquareString& other) = delete;
 		RegSquareString& operator=(RegSquareString&& other) = delete;
 
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -85,7 +85,7 @@ namespace absyn::bnf {
 		RegCurlyString& operator=(RegCurlyString& other) = delete;
 		RegCurlyString& operator=(RegCurlyString&& other) = delete;
 
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -93,13 +93,13 @@ namespace absyn::bnf {
 
     class RegEps : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegRealChar : public Reg {
 	public:
 		RegRealChar() : mV1{'\0'} {}
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
         [[nodiscard]] char v1() const { return mV1; }
     private:
         char mV1;
@@ -107,17 +107,17 @@ namespace absyn::bnf {
 
     class RegStar : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegPlus : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegQuestion : public Reg {
 	public:
-        void accept(RegVisitor* v) override;
+        void accept(RegVisitor& v) const override;
     };
 
     class RegMinus : public Reg {
@@ -130,9 +130,9 @@ namespace absyn::bnf {
 		RegMinus& operator=(RegMinus& other) = delete;
 		RegMinus& operator=(RegMinus&& other) = delete;
 
-        void accept(RegVisitor* v) override;
-        [[nodiscard]] const Reg* v1() const { return mV1; }
-        [[nodiscard]] const Reg* v2() const { return mV2; }
+        void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
+        [[nodiscard]] const Reg& v2() const { return *mV2; }
     private:
         const Reg* mV1;
         const Reg* mV2;
@@ -148,9 +148,9 @@ namespace absyn::bnf {
 		RegOr& operator=(RegOr& other) = delete;
 		RegOr& operator=(RegOr&& other) = delete;
 
-        void accept(RegVisitor* v) override;
-        [[nodiscard]] const Reg* v1() const { return mV1; }
-        [[nodiscard]] const Reg* v2() const { return mV2; }
+        void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
+        [[nodiscard]] const Reg& v2() const { return *mV2; }
     private:
         const Reg* mV1;
         const Reg* mV2;
@@ -166,35 +166,35 @@ namespace absyn::bnf {
 		RegDoubleReg& operator=(RegDoubleReg& other) = delete;
 		RegDoubleReg& operator=(RegDoubleReg&& other) = delete;
 
-        void accept(RegVisitor* v) override;
-        [[nodiscard]] const Reg* v1() const { return mV1; }
-        [[nodiscard]] const Reg* v2() const { return mV2; }
+        void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
+        [[nodiscard]] const Reg& v2() const { return *mV2; }
     private:
         const Reg* mV1;
         const Reg* mV2;
     };
 
     struct RegVisitor {
-        virtual void visit(RegReg* token) = 0;
-        virtual void visit(RegOr* token) = 0;
-        virtual void visit(RegMinus* token) = 0;
-        virtual void visit(RegDoubleReg* token) = 0;
-        virtual void visit(RegStar* token) = 0;
-        virtual void visit(RegPlus* token) = 0;
-        virtual void visit(RegQuestion* token) = 0;
-        virtual void visit(RegEps* token) = 0;
-        virtual void visit(RegRealChar* token) = 0;
-        virtual void visit(RegSquareString* token) = 0;
-        virtual void visit(RegCurlyString* token) = 0;
-        virtual void visit(RegDigit* token) = 0;
-        virtual void visit(RegLetter* token) = 0;
-        virtual void visit(RegUpper* token) = 0;
-        virtual void visit(RegLower* token) = 0;
-        virtual void visit(RegChar* token) = 0;
+        virtual void visit(const RegReg& token) = 0;
+        virtual void visit(const RegOr& token) = 0;
+        virtual void visit(const RegMinus& token) = 0;
+        virtual void visit(const RegDoubleReg& token) = 0;
+        virtual void visit(const RegStar& token) = 0;
+        virtual void visit(const RegPlus& token) = 0;
+        virtual void visit(const RegQuestion& token) = 0;
+        virtual void visit(const RegEps& token) = 0;
+        virtual void visit(const RegRealChar& token) = 0;
+        virtual void visit(const RegSquareString& token) = 0;
+        virtual void visit(const RegCurlyString& token) = 0;
+        virtual void visit(const RegDigit& token) = 0;
+        virtual void visit(const RegLetter& token) = 0;
+        virtual void visit(const RegUpper& token) = 0;
+        virtual void visit(const RegLower& token) = 0;
+        virtual void visit(const RegChar& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (RegAcceptFn)(void*, RegVisitor* v);
+    typedef void (RegAcceptFn)(void*, RegVisitor& v);
     struct RegVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

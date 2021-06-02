@@ -17,12 +17,12 @@ namespace absyn::bnf {
         ListItem& operator=(ListItem& other) = delete;
         ListItem& operator=(ListItem&& other) = delete;
 
-        virtual void accept(struct ListItemVisitor* v) = 0;
+        virtual void accept(struct ListItemVisitor& v) const = 0;
     };
 
     class ListItemEpsilon : public ListItem {
 	public:
-        void accept(ListItemVisitor* v) override;
+        void accept(ListItemVisitor& v) const override;
     };
 
     class ListItemItemList : public ListItem {
@@ -35,21 +35,21 @@ namespace absyn::bnf {
 		ListItemItemList& operator=(ListItemItemList& other) = delete;
 		ListItemItemList& operator=(ListItemItemList&& other) = delete;
 
-        void accept(ListItemVisitor* v) override;
-        [[nodiscard]] const Item* v1() const { return mV1; }
-        [[nodiscard]] const ListItem* v2() const { return mV2; }
+        void accept(ListItemVisitor& v) const override;
+        [[nodiscard]] const Item& v1() const { return *mV1; }
+        [[nodiscard]] const ListItem& v2() const { return *mV2; }
     private:
         const Item* mV1;
         const ListItem* mV2;
     };
 
     struct ListItemVisitor {
-        virtual void visit(ListItemEpsilon* token) = 0;
-        virtual void visit(ListItemItemList* token) = 0;
+        virtual void visit(const ListItemEpsilon& token) = 0;
+        virtual void visit(const ListItemItemList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListItemAcceptFn)(void*, ListItemVisitor* v);
+    typedef void (ListItemAcceptFn)(void*, ListItemVisitor& v);
     struct ListItemVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

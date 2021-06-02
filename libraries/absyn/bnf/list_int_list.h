@@ -17,12 +17,12 @@ namespace absyn::bnf {
         ListIntList& operator=(ListIntList& other) = delete;
         ListIntList& operator=(ListIntList&& other) = delete;
 
-        virtual void accept(struct ListIntListVisitor* v) = 0;
+        virtual void accept(struct ListIntListVisitor& v) const = 0;
     };
 
     class ListIntListEpsilon : public ListIntList {
 	public:
-        void accept(ListIntListVisitor* v) override;
+        void accept(ListIntListVisitor& v) const override;
     };
 
     class ListIntListIntList : public ListIntList {
@@ -35,8 +35,8 @@ namespace absyn::bnf {
 		ListIntListIntList& operator=(ListIntListIntList& other) = delete;
 		ListIntListIntList& operator=(ListIntListIntList&& other) = delete;
 
-        void accept(ListIntListVisitor* v) override;
-        [[nodiscard]] const IntList* v1() const { return mV1; }
+        void accept(ListIntListVisitor& v) const override;
+        [[nodiscard]] const IntList& v1() const { return *mV1; }
     private:
         const IntList* mV1;
     };
@@ -51,22 +51,22 @@ namespace absyn::bnf {
 		ListIntListIntListList& operator=(ListIntListIntListList& other) = delete;
 		ListIntListIntListList& operator=(ListIntListIntListList&& other) = delete;
 
-        void accept(ListIntListVisitor* v) override;
-        [[nodiscard]] const IntList* v1() const { return mV1; }
-        [[nodiscard]] const ListIntList* v2() const { return mV2; }
+        void accept(ListIntListVisitor& v) const override;
+        [[nodiscard]] const IntList& v1() const { return *mV1; }
+        [[nodiscard]] const ListIntList& v2() const { return *mV2; }
     private:
         const IntList* mV1;
         const ListIntList* mV2;
     };
 
     struct ListIntListVisitor {
-        virtual void visit(ListIntListEpsilon* token) = 0;
-        virtual void visit(ListIntListIntList* token) = 0;
-        virtual void visit(ListIntListIntListList* token) = 0;
+        virtual void visit(const ListIntListEpsilon& token) = 0;
+        virtual void visit(const ListIntListIntList& token) = 0;
+        virtual void visit(const ListIntListIntListList& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ListIntListAcceptFn)(void*, ListIntListVisitor* v);
+    typedef void (ListIntListAcceptFn)(void*, ListIntListVisitor& v);
     struct ListIntListVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

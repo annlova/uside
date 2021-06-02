@@ -4,6 +4,6 @@
 
 #include "prof_item.h"
 
-void absyn::bnf::ProfItemBrackets::accept(ProfItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ProfItemBrackets::accept(ProfItemVisitor& v) const {
+    v.visit(*this);
 }

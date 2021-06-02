@@ -4,10 +4,10 @@
 
 #include "list_item.h"
 
-void absyn::bnf::ListItemItemList::accept(ListItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListItemItemList::accept(ListItemVisitor& v) const {
+    v.visit(*this);
 }
 
-void absyn::bnf::ListItemEpsilon::accept(ListItemVisitor* v) {
-    v->visit(this);
+void absyn::bnf::ListItemEpsilon::accept(ListItemVisitor& v) const {
+    v.visit(*this);
 }

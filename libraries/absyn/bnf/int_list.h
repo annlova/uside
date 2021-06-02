@@ -17,7 +17,7 @@ namespace absyn::bnf {
         IntList& operator=(IntList& other) = delete;
         IntList& operator=(IntList&& other) = delete;
 
-        virtual void accept(struct IntListVisitor* v) = 0;
+        virtual void accept(struct IntListVisitor& v) const = 0;
     };
 
     class IntListListInteger : public IntList {
@@ -30,18 +30,18 @@ namespace absyn::bnf {
 		IntListListInteger& operator=(IntListListInteger& other) = delete;
 		IntListListInteger& operator=(IntListListInteger&& other) = delete;
 
-        void accept(IntListVisitor* v) override;
-        [[nodiscard]] const ListInteger* v1() const { return mV1; }
+        void accept(IntListVisitor& v) const override;
+        [[nodiscard]] const ListInteger& v1() const { return *mV1; }
     private:
         const ListInteger* mV1;
     };
 
     struct IntListVisitor {
-        virtual void visit(IntListListInteger* token) = 0;
+        virtual void visit(const IntListListInteger& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (IntListAcceptFn)(void*, IntListVisitor* v);
+    typedef void (IntListAcceptFn)(void*, IntListVisitor& v);
     struct IntListVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

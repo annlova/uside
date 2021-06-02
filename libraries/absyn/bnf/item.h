@@ -17,7 +17,7 @@ namespace absyn::bnf {
         Item& operator=(Item& other) = delete;
         Item& operator=(Item&& other) = delete;
 
-        virtual void accept(struct ItemVisitor* v) = 0;
+        virtual void accept(struct ItemVisitor& v) const = 0;
     };
 
     class ItemString : public Item {
@@ -30,7 +30,7 @@ namespace absyn::bnf {
 		ItemString& operator=(ItemString& other) = delete;
 		ItemString& operator=(ItemString&& other) = delete;
 
-        void accept(ItemVisitor* v) override;
+        void accept(ItemVisitor& v) const override;
         [[nodiscard]] const char* v1() const { return mV1; }
     private:
         const char* mV1;
@@ -46,19 +46,19 @@ namespace absyn::bnf {
 		ItemCat& operator=(ItemCat& other) = delete;
 		ItemCat& operator=(ItemCat&& other) = delete;
 
-        void accept(ItemVisitor* v) override;
-        [[nodiscard]] const Cat* v1() const { return mV1; }
+        void accept(ItemVisitor& v) const override;
+        [[nodiscard]] const Cat& v1() const { return *mV1; }
     private:
         const Cat* mV1;
     };
 
     struct ItemVisitor {
-        virtual void visit(ItemString* token) = 0;
-        virtual void visit(ItemCat* token) = 0;
+        virtual void visit(const ItemString& token) = 0;
+        virtual void visit(const ItemCat& token) = 0;
     };
 
     typedef void (DestructFn)(void*);
-    typedef void (ItemAcceptFn)(void*, ItemVisitor* v);
+    typedef void (ItemAcceptFn)(void*, ItemVisitor& v);
     struct ItemVTable {
         DestructFn* mDestructFn1;
         DestructFn* mDestructFn2;

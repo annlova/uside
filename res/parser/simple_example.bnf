@@ -1,1 +1,3 @@
-coercions Exp 6 ;
+Monkey. Ape ::= Hairy ;
+MonkeyLong. Hairy ::= "long" ;
+MonkeyShort. Hairy ::= "short" ;
