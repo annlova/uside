@@ -107,17 +107,50 @@ namespace absyn::bnf {
 
     class RegStar : public Reg {
 	public:
+        RegStar() : mV1{nullptr} {}
+        ~RegStar() override { delete mV1; }
+        RegStar(RegStar& regStar) = delete;
+        RegStar(RegStar&& regStar) = delete;
+
+        RegStar& operator=(RegStar& other) = delete;
+        RegStar& operator=(RegStar&& other) = delete;
+
         void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
+    private:
+        const Reg* mV1;
     };
 
     class RegPlus : public Reg {
 	public:
+        RegPlus() : mV1{nullptr} {}
+        ~RegPlus() override { delete mV1; }
+        RegPlus(RegPlus& regPlus) = delete;
+        RegPlus(RegPlus&& regPlus) = delete;
+
+        RegPlus& operator=(RegPlus& other) = delete;
+        RegPlus& operator=(RegPlus&& other) = delete;
+
         void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
+    private:
+        const Reg* mV1;
     };
 
     class RegQuestion : public Reg {
-	public:
+    public:
+        RegQuestion() : mV1{nullptr} {}
+        ~RegQuestion() override { delete mV1; }
+        RegQuestion(RegQuestion& regQuestion) = delete;
+        RegQuestion(RegQuestion&& regQuestion) = delete;
+
+        RegQuestion& operator=(RegQuestion& other) = delete;
+        RegQuestion& operator=(RegQuestion&& other) = delete;
+
         void accept(RegVisitor& v) const override;
+        [[nodiscard]] const Reg& v1() const { return *mV1; }
+    private:
+        const Reg* mV1;
     };
 
     class RegMinus : public Reg {

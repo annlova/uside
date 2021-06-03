@@ -18,6 +18,8 @@
 #include <file/include/file_include.h>
 #include <assertion/h/assertion_macro.h>
 
+#include "bnf_compiler_terminal_data.h"
+
 namespace parser {
     namespace bnf = absyn::bnf;
 
@@ -33,7 +35,8 @@ namespace parser {
         std::unordered_map<std::string, std::unordered_set<std::string>> mCatLabelMap;
         std::unordered_map<std::string, std::vector<std::string>> mLabelVarMap;
 
-        std::
+        std::unordered_set<BnfCompilerTerminalData, BnfCompilerTerminalDataHasher> mTerminals;
+        BnfCompilerTerminalData* mCurrentTerminalData;
 
         std::stack<const char*> mLabelReturnStack;
         std::stack<const char*> mCatReturnStack;

@@ -1,22 +1,22 @@
-token Id            (letter)(letter | Digit | '_')* ;
+token Id            (letter) (letter | digit | '_')* ;
 
 // VariableIdentifier:
 VarIdent.           VariableIdentifier ::= Id ;
 
 Token IntConst      (["123456789"](digit)* | '0'["01234567"]* | ("0x" | "0X")(digit | ["abcdefABCDEF"]])*) ;
 Token UIntConst     (["123456789"](digit)* | '0'["01234567"]* | ("0x" | "0X")(digit | ["abcdefABCDEF"]])*)('u' | 'U') ;
-Token FloatConst    ((digit* ’.’ Digit+ | Digit+ '.' Digit*) (((’e’ | 'E') (’-’ | '+'))? Digit+)?)(["fF"] | Eps) ; // TODO FIX
+Token FloatConst    ((digit* ’.’ digit+ | digit+ '.' digit*) (((’e’ | 'E') (’-’ | '+'))? digit+)?)(["fF"] | eps) ; // TODO FIX
 Token BoolConst     ("true" | "false") ;
-Token DoubleConst   ((digit* ’.’ Digit+ | Digit+ '.' Digit*) (((’e’ | 'E') (’-’ | '+'))? Digit+)?)("lf" | "LF") ; // TODO FIX
+Token DoubleConst   ((digit* ’.’ digit+ | digit+ '.' digit*) (((’e’ | 'E') (’-’ | '+'))? digit+)?)("lf" | "LF") ; // TODO FIX
 
 // PrimaryExpression
-PriExpVarIdent.     PrimaryExpression ::= VariableIdentifier ;
-PriExpIntConst.     PrimaryExpression ::= IntConst ;
-PriExpUIntConst.    PrimaryExpression ::= UIntConst ;
-PriExpFloatConst.   PrimaryExpression ::= FloatConst ;
-PriExpBoolConst.    PrimaryExpression ::= BoolConst ;
-PriExpDoubleConst.  PrimaryExpression ::= DoubleConst ;
-PriExpParenthesis.     PrimaryExpression ::= "(" Expression ")" ;
+PriExpVarIdent.         PrimaryExpression ::= VariableIdentifier ;
+PriExpIntConst.         PrimaryExpression ::= IntConst ;
+PriExpUIntConst.        PrimaryExpression ::= UIntConst ;
+PriExpFloatConst.       PrimaryExpression ::= FloatConst ;
+PriExpBoolConst.        PrimaryExpression ::= BoolConst ;
+PriExpDoubleConst.      PrimaryExpression ::= DoubleConst ;
+PriExpParenthesis.      PrimaryExpression ::= "(" Expression ")" ;
 
 // PostfixExpression
 PostExpPriExp.      PostfixExpression ::= PrimaryExpression ;

@@ -1,3 +1,11 @@
-Monkey. Ape ::= Hairy ;
-MonkeyLong. Hairy ::= "long" ;
-MonkeyShort. Hairy ::= "short" ;
+token Id (letter+) (letter | digit | '_')* ;
+
+12.0
+.4f
+.23f
+.244F
+1.23e+123f
+1.0lf
+1.22e23LF
+
+((\d*\.\d+|\d+\.\d*)(((e|E)(\-|\+))?\d+)?)([fF]|[])

@@ -159,15 +159,16 @@ namespace parser {
 //                        printOutReduce(*t, idToString, symbols, action.mActionPointer);
 //                        delete t;
                         Token tok(rule.mcCat->mcId, &(*data));
-//                        LOG() << idToString.at(lookahead.mId) << LOG_END;
                         stack.push(std::make_pair(table[stack.top().first]->mActionTableRow[rule.mcCat->mcId].mActionPointer, tok));
+                        LOG_DBG() << idToString.at(stack.top().second.mId) << LOG_END;
+                        LOG_DBG() << idToString.at(lookahead.mId) << LOG_END;
                     }
                         break;
                     case SHIFT:
                         if (emptyWordRead) {
                             Token tok(gcEmptyWordSymbolId, nullptr);
                             stack.push(std::make_pair(action.mActionPointer, tok));
-//                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
+                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
 //                            t = new Token(gcEmptyWordSymbolId, nullptr);
 //                            printOutShift(*t, idToString, symbols, action.mActionPointer);
 //                            delete t;
@@ -176,7 +177,7 @@ namespace parser {
 //                            out.push_back(token);
 //                            printOutShift(token, idToString, symbols, action.mActionPointer);
                             lookahead = tokenizer.next();
-//                            LOG_TRC() << idToString.at(stack.top().second.mId) << LOG_END;
+                            LOG() << idToString.at(stack.top().second.mId) << LOG_END;
 //                            printOutToken(token, idToString, symbols, action.mActionPointer);
                         }
                         break;

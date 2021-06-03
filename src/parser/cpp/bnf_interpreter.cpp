@@ -9,6 +9,9 @@
 #include "../h/bnf_compiler_writer.h"
 
 int parser::BnfInterpreter::interpret(const absyn::bnf::Grammar& grammar) {
+
+    mTerminals.insert();
+
     GrammarVisitor visitor(*this);
     grammar.accept(visitor);
     LOG_TRC() << "Attempting to write absyn files..." << LOG_END;
@@ -177,8 +180,24 @@ void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefInternal& to
 void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefToken& token) {
 	LOG_TRC() << "Visiting DefToken" << LOG_END;
 	LOG() << token.v1() << LOG_END;
+
+	// A new token is being declared
+    ASSERT(mEnv.mCurrentTerminalData == nullptr);
+    BnfCompilerTerminalData data{token.v1()};
+    mEnv.mCurrentTerminalData = &data;
+
+    // Construct the regex
 	RegVisitor visitor2(mEnv);
 	token.v2().accept(visitor2);
+
+    auto inserted = mEnv.mTerminals.insert(std::move(data));
+    if (inserted.second) {
+        LOG() << "DefToken complete - regex: " << inserted.first->mCompleteRegex << LOG_END;
+    } else {
+        LOG_ERR() << "Duplicate token \"" << token.v1() << "\"declared!" << LOG_END;
+        ASSERT(false); // TODO: Better error handling
+    }
+    mEnv.mCurrentTerminalData = nullptr;
 }
 
 void parser::BnfInterpreter::DefVisitor::visit(const absyn::bnf::DefPositionToken& token) {
@@ -429,11 +448,14 @@ void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegOr& token) {
 	LOG_TRC() << "Visiting RegOr" << LOG_END;
 	RegVisitor visitor(mEnv);
 	token.v1().accept(visitor);
+	auto* t = mEnv.mCurrentTerminalData;
+	t->mCompleteRegex += "|";
 	token.v2().accept(visitor);
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegMinus& token) {
 	LOG_TRC() << "Visiting RegMinus" << LOG_END;
+	LOG_ERR() << "NOT IMPLEMENTED!" << LOG_END;
 	RegVisitor visitor(mEnv);
 	token.v1().accept(visitor);
 	token.v2().accept(visitor);
@@ -441,21 +463,40 @@ void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegMinus& token
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegDoubleReg& token) {
 	LOG_TRC() << "Visiting RegDoubleReg" << LOG_END;
-	RegVisitor visitor(mEnv);
+    RegVisitor visitor(mEnv);
+    auto* t = mEnv.mCurrentTerminalData;
+	t->mCompleteRegex += "(";
 	token.v1().accept(visitor);
+    t->mCompleteRegex += ")(";
 	token.v2().accept(visitor);
+    t->mCompleteRegex += ")";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegStar& token) {
 	LOG_TRC() << "Visiting RegStar" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "(";
+    RegVisitor visitor(mEnv);
+    token.v1().accept(visitor);
+    t->mCompleteRegex += ")*";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegPlus& token) {
 	LOG_TRC() << "Visiting RegPlus" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "(";
+    RegVisitor visitor(mEnv);
+    token.v1().accept(visitor);
+    t->mCompleteRegex += ")+";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegQuestion& token) {
 	LOG_TRC() << "Visiting RegQuestion" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "(";
+    RegVisitor visitor(mEnv);
+    token.v1().accept(visitor);
+    t->mCompleteRegex += ")?";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegEps& token) {
@@ -465,36 +506,52 @@ void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegEps& token) 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegRealChar& token) {
 	LOG_TRC() << "Visiting RegRealChar" << LOG_END;
 	LOG() << token.v1() << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += token.v1();
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegSquareString& token) {
 	LOG_TRC() << "Visiting RegSquareString" << LOG_END;
 	LOG() << token.v1() << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += token.v1();
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegCurlyString& token) {
 	LOG_TRC() << "Visiting RegCurlyString" << LOG_END;
     LOG() << token.v1() << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex = t->mCompleteRegex + "[" + token.v1() + "]";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegDigit& token) {
 	LOG_TRC() << "Visiting RegDigit" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "\\d";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegLetter& token) {
 	LOG_TRC() << "Visiting RegLetter" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "[:alpha:]";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegUpper& token) {
 	LOG_TRC() << "Visiting RegUpper" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "[:upper:]";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegLower& token) {
 	LOG_TRC() << "Visiting RegLower" << LOG_END;
+    auto* t = mEnv.mCurrentTerminalData;
+    t->mCompleteRegex += "[:lower:]";
 }
 
 void parser::BnfInterpreter::RegVisitor::visit(const absyn::bnf::RegChar& token) {
 	LOG_TRC() << "Visiting RegChar" << LOG_END;
+	LOG_ERR() << "NOT IMPLEMENTED!" << LOG_END;
+	// TODO: figure out
 }
 
 void parser::BnfInterpreter::ListIdentVisitor::visit(const absyn::bnf::ListIdentIdent& token) {
