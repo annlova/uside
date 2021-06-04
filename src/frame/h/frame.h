@@ -13,6 +13,8 @@
 
 #include <logs/include/log_include.h>
 
+#include "frame_input_callback_interface.h"
+
 namespace frame {
     struct GLFWwindowDeleter {
         void operator()(GLFWwindow* handle) {
@@ -21,7 +23,7 @@ namespace frame {
         }
     };
 
-    class Frame {
+    class Frame : public FrameInputCallbackInterface {
     public:
         Frame(std::unique_ptr<GLFWwindow, GLFWwindowDeleter> handle);
         ~Frame();
@@ -32,44 +34,44 @@ namespace frame {
         void swapBuffers();
         double getTime();
 
-    public: // Callback setters
-        GLFWmousebuttonfun getMouseButtonFun() const;
-        GLFWcursorposfun getCursorPosFun() const;
-        GLFWcursorenterfun getCursorEnterFun() const;
-        GLFWscrollfun getScrollFun() const;
-        GLFWkeyfun getKeyFun() const;
-        GLFWcharfun getCharFun() const;
-        GLFWcharmodsfun getCharModsFun() const;
-        GLFWdropfun getDropFun() const;
-        GLFWjoystickfun getJoystickFun() const;
-        GLFWwindowposfun getWindowPosFun() const;
-        GLFWwindowsizefun getWindowSizeFun() const;
-        GLFWwindowclosefun getWindowCloseFun() const;
-        GLFWwindowrefreshfun getWindowRefreshFun() const;
-        GLFWwindowfocusfun getWindowFocusFun() const;
-        GLFWwindowiconifyfun getWindowIconifyFun() const;
-        GLFWwindowmaximizefun getWindowMaximizeFun() const;
-        GLFWwindowcontentscalefun getWindowContentScaleFun() const;
-        GLFWframebuffersizefun getFrameBufferSizeFun() const;
+    public: // Callback getters and setters
+        GLFWmousebuttonfun getMouseButtonFun() const override;
+        GLFWcursorposfun getCursorPosFun() const override;
+        GLFWcursorenterfun getCursorEnterFun() const override;
+        GLFWscrollfun getScrollFun() const override;
+        GLFWkeyfun getKeyFun() const override;
+        GLFWcharfun getCharFun() const override;
+        GLFWcharmodsfun getCharModsFun() const override;
+        GLFWdropfun getDropFun() const override;
+        GLFWjoystickfun getJoystickFun() const override;
+        GLFWwindowposfun getWindowPosFun() const override;
+        GLFWwindowsizefun getWindowSizeFun() const override;
+        GLFWwindowclosefun getWindowCloseFun() const override;
+        GLFWwindowrefreshfun getWindowRefreshFun() const override;
+        GLFWwindowfocusfun getWindowFocusFun() const override;
+        GLFWwindowiconifyfun getWindowIconifyFun() const override;
+        GLFWwindowmaximizefun getWindowMaximizeFun() const override;
+        GLFWwindowcontentscalefun getWindowContentScaleFun() const override;
+        GLFWframebuffersizefun getFrameBufferSizeFun() const override;
 
-        void setMouseButtonFun(GLFWmousebuttonfun callbackFunction);
-        void setCursorPosFun(GLFWcursorposfun callbackFunction);
-        void setCursorEnterFun(GLFWcursorenterfun callbackFunction);
-        void setScrollFun(GLFWscrollfun callbackFunction);
-        void setKeyFun(GLFWkeyfun callbackFunction);
-        void setCharFun(GLFWcharfun callbackFunction);
-        void setCharModsFun(GLFWcharmodsfun callbackFunction);
-        void setDropFun(GLFWdropfun callbackFunction);
-        void setJoystickFun(GLFWjoystickfun callbackFunction);
-        void setWindowPosFun(GLFWwindowposfun callbackFunction);
-        void setWindowSizeFun(GLFWwindowsizefun callbackFunction);
-        void setWindowCloseFun(GLFWwindowclosefun callbackFunction);
-        void setWindowRefreshFun(GLFWwindowrefreshfun callbackFunction);
-        void setWindowFocusFun(GLFWwindowfocusfun callbackFunction);
-        void setWindowIconifyFun(GLFWwindowiconifyfun callbackFunction);
-        void setWindowMaximizeFun(GLFWwindowmaximizefun callbackFunction);
-        void setWindowContentScaleFun(GLFWwindowcontentscalefun callbackFunction);
-        void setFrameBufferSizeFun(GLFWframebuffersizefun callbackFunction);
+        void setMouseButtonFun(GLFWmousebuttonfun callbackFunction) override;
+        void setCursorPosFun(GLFWcursorposfun callbackFunction) override;
+        void setCursorEnterFun(GLFWcursorenterfun callbackFunction) override;
+        void setScrollFun(GLFWscrollfun callbackFunction) override;
+        void setKeyFun(GLFWkeyfun callbackFunction) override;
+        void setCharFun(GLFWcharfun callbackFunction) override;
+        void setCharModsFun(GLFWcharmodsfun callbackFunction) override;
+        void setDropFun(GLFWdropfun callbackFunction) override;
+        void setJoystickFun(GLFWjoystickfun callbackFunction) override;
+        void setWindowPosFun(GLFWwindowposfun callbackFunction) override;
+        void setWindowSizeFun(GLFWwindowsizefun callbackFunction) override;
+        void setWindowCloseFun(GLFWwindowclosefun callbackFunction) override;
+        void setWindowRefreshFun(GLFWwindowrefreshfun callbackFunction) override;
+        void setWindowFocusFun(GLFWwindowfocusfun callbackFunction) override;
+        void setWindowIconifyFun(GLFWwindowiconifyfun callbackFunction) override;
+        void setWindowMaximizeFun(GLFWwindowmaximizefun callbackFunction) override;
+        void setWindowContentScaleFun(GLFWwindowcontentscalefun callbackFunction) override;
+        void setFrameBufferSizeFun(GLFWframebuffersizefun callbackFunction) override;
 
         void releaseCallbacks();
 

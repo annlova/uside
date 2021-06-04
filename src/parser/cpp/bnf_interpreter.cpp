@@ -9,8 +9,16 @@
 #include "../h/bnf_compiler_writer.h"
 
 int parser::BnfInterpreter::interpret(const absyn::bnf::Grammar& grammar) {
-
-    mTerminals.insert();
+    BnfCompilerTerminalData identTermData{"Ident", "^[[:upper:]]\\w*[^\\w]", "^[[:upper:]](\\w*([^\\w])?)?", "STRING"};
+    BnfCompilerTerminalData stringTermData{"String", "^\"([^\\\\\"]|\\\\.)*\"(.|\\n|\\r)", "^\"([^\\\\\"]|\\\\.)*(\"((.|\\n|\\r))?)?", "STRING"};
+    BnfCompilerTerminalData charTermData{"Char", "^'([^\\\\]|\\\\.)'(.|\\n|\\r)", "^'(([^\\\\]|\\\\.)('((.|\\n|\\r))?)?)?", "CHAR"};
+    BnfCompilerTerminalData integerTermData{"Integer", "^\\d+[^\\w]", "^\\d+[^\\w]?", "INT"};
+    BnfCompilerTerminalData doubleTermData{"Double", "", "", "DOUBLE"}; // TODO
+    (void) mTerminals.insert(std::move(identTermData));
+    (void) mTerminals.insert(std::move(stringTermData));
+    (void) mTerminals.insert(std::move(charTermData));
+    (void) mTerminals.insert(std::move(integerTermData));
+    (void) mTerminals.insert(std::move(doubleTermData));
 
     GrammarVisitor visitor(*this);
     grammar.accept(visitor);
